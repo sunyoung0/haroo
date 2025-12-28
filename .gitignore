@@ -1,0 +1,23 @@
+# --- Java / Spring Boot (back) ---
+back/.gradle/
+back/build/
+back/out/
+back/bin/
+back/.idea/
+
+# --- Node / React / Vue (front) ---
+front/node_modules/
+front/.next/
+front/dist/
+front/.env.local
+front/build/
+
+# --- System & IDE ---
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# --- Secrets (매우 중요) ---
+**/application.yml
+**/.env
