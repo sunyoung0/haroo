@@ -43,6 +43,11 @@ dependencies {
 
 	// 유효성 검사를 위한 어노테이션 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// jwt 의존성 추가
+	implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
 }
 
 tasks.named('test') {

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice   // 모든 컨트롤러에서 발생하는 예외를 여기서 가로챔
 public class GlobalExceptionHandler {
@@ -50,6 +52,16 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 request.getDescription(false).replace("uri=", ""));
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
+    }
+
+    // 로그인 - 이메일 존재 X / 이메일 or 비밀번호 틀렸을 시 예외 처리
+    @ExceptionHandler(LoginFailedException.class)
+    public ResponseEntity<Map<String, String>> handleLoginFailed(LoginFailedException exception) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Login Error");
+        response.put("message", exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
 
