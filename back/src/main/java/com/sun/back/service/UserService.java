@@ -61,4 +61,17 @@ public class UserService {
         // 응답 DTO 생성 및 반환
         return new LoginResponse(accessToken, "Bearer", user.getEmail(), user.getId());
     }
+
+    @Transactional
+    public void updateNickname(String email, String newNickname) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        // 닉네임 중복 체크
+        if(userRepository.existsByNickname(newNickname)) {
+            throw new NicknameExistsException("이미 사용 중인 닉네임입니다.");
+        }
+
+        user.updateNickname(newNickname);
+    }
 }

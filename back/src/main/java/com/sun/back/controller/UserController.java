@@ -2,16 +2,15 @@ package com.sun.back.controller;
 
 import com.sun.back.dto.user.LoginRequest;
 import com.sun.back.dto.user.LoginResponse;
+import com.sun.back.dto.user.NicknameRequest;
 import com.sun.back.dto.user.SignUpRequest;
 import com.sun.back.entity.User;
 import com.sun.back.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,10 +31,17 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // 닉네임 수정
+    @PatchMapping("/nickname")
+    public ResponseEntity<String> updateNickname(@AuthenticationPrincipal String email, @RequestBody NicknameRequest dto) {
+        userService.updateNickname(email, dto.nickname());
+        return ResponseEntity.ok("닉네임이 성공적으로 수정되었습니다.");
+    }
+
+    // TODO : 토큰 테스트용 나중에 지우기
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("토큰 인증 성공");
     }
-
 
 }
