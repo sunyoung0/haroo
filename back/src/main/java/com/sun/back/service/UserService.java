@@ -1,11 +1,12 @@
 package com.sun.back.service;
 
-import com.sun.back.dto.user.LoginRequest;
-import com.sun.back.dto.user.LoginResponse;
-import com.sun.back.dto.user.SignUpRequest;
+import com.sun.back.dto.diary.GroupDiaryResponse;
+import com.sun.back.dto.user.*;
+import com.sun.back.entity.diary.DiaryMember;
 import com.sun.back.exception.EmailExistsException;
 import com.sun.back.exception.LoginFailedException;
 import com.sun.back.exception.NicknameExistsException;
+import com.sun.back.repository.DiaryMemberRepository;
 import com.sun.back.repository.UserRepository;
 import com.sun.back.security.JwtService;
 import jakarta.validation.Valid;
@@ -16,11 +17,14 @@ import com.sun.back.entity.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final DiaryMemberRepository diaryMemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -43,6 +47,7 @@ public class UserService {
         return ResponseEntity.ok(userRepository.save(user));
     }
 
+    // 로그인
     @Transactional(readOnly = true)
     public LoginResponse login(@Valid LoginRequest dto) {
 
@@ -62,6 +67,35 @@ public class UserService {
         return new LoginResponse(accessToken, "Bearer", user.getEmail(), user.getId());
     }
 
+    // 유저 정보 조회
+    @Transactional(readOnly = true)
+    public GetUserResponse getUser(String email) {
+        // 유저 조회
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 유저가 속한 그룹 목록 조회
+        List<DiaryMember> members = diaryMemberRepository.findAllByUserWithGroup(user);
+
+        // DTO  변환
+        List<GroupDiaryResponse> groupDiaryResponses = members.stream()
+                .map(m -> new GroupDiaryResponse(
+                        m.getDiaryGroup().getId(),
+                        m.getDiaryGroup().getTitle(),
+                        m.getDiaryGroup().getType(),
+                        m.getRole()
+                ))
+                .toList();
+
+        return new GetUserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getNickname(),
+                groupDiaryResponses
+        );
+    }
+
+    // 닉네임 수정
     @Transactional
     public void updateNickname(String email, String newNickname) {
         User user = userRepository.findByEmail(email)

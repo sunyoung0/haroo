@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  // 무분별한 생성자 생성 막기 위함
 @Table(name = "users")
 public class User {
 
@@ -26,9 +26,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    // 한명의 유저는 여러개의 다이어리 멤버(오너)가 될 수 있음
     @OneToMany(mappedBy = "user")
     private List<DiaryMember> diaryMembers = new ArrayList<>();
 
+    // 회원 가입 시 필요한 필드만 포함한 생성자
     @Builder
     public User(String email, String password, String nickname) {
         this.email = email;

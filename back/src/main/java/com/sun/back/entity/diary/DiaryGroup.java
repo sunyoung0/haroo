@@ -11,9 +11,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DiaryGroup {   // 다이어리 종류(개인인지 공유인지)
 
@@ -29,14 +26,23 @@ public class DiaryGroup {   // 다이어리 종류(개인인지 공유인지)
 
     private String notice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)  // 작성자의 정보를 바로 가져올 필요가 없다면 조회하지 않고 미뤄둠
     @JoinColumn(name = "created_by")
     private User user;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "diaryGroup", cascade = CascadeType.ALL)
     private List<DiaryMember> members = new ArrayList<>();
+
+    @Builder
+    public DiaryGroup(String title, GroupType type, String notice, User user, LocalDateTime createdAt) {
+        this.title = title;
+        this.type = type;
+        this.notice = notice;
+        this.user = user;
+        this.createdAt = LocalDateTime.now();
+    }
 }
 
 

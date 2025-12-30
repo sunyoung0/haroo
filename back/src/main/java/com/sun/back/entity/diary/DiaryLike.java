@@ -11,6 +11,15 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "diary_like",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_diary_user",
+                        columnNames = {"diary_id", "user_id"} // 일기ID와 유저ID의 조합은 유일해야 함
+                )
+        }
+)
 public class DiaryLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

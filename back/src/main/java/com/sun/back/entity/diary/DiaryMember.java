@@ -30,5 +30,13 @@ public class DiaryMember {  // 다이어리 멤버
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    private LocalDateTime joinedAt = LocalDateTime.now();
+    private LocalDateTime joinedAt;
+
+    @Builder
+    public DiaryMember(DiaryGroup diaryGroup, User user, MemberRole role, LocalDateTime joinedAt) {
+        this.diaryGroup = diaryGroup;
+        this.user = user;
+        this.role = role;
+        this.joinedAt = LocalDateTime.now();
+    }
 }

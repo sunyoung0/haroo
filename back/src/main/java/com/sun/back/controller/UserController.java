@@ -1,9 +1,6 @@
 package com.sun.back.controller;
 
-import com.sun.back.dto.user.LoginRequest;
-import com.sun.back.dto.user.LoginResponse;
-import com.sun.back.dto.user.NicknameRequest;
-import com.sun.back.dto.user.SignUpRequest;
+import com.sun.back.dto.user.*;
 import com.sun.back.entity.User;
 import com.sun.back.service.UserService;
 import jakarta.validation.Valid;
@@ -29,6 +26,12 @@ public class UserController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest dto) {
         LoginResponse response = userService.login(dto);
         return ResponseEntity.ok(response);
+    }
+
+    // 회원 정보 조회
+    @GetMapping("/user")
+    public ResponseEntity<GetUserResponse> getUser(@AuthenticationPrincipal String email) {
+        return ResponseEntity.ok(userService.getUser(email));
     }
 
     // 닉네임 수정
