@@ -1,8 +1,6 @@
 package com.sun.back.service;
 
-import com.sun.back.dto.diary.GroupDiaryResponse;
 import com.sun.back.dto.user.*;
-import com.sun.back.entity.diary.DiaryMember;
 import com.sun.back.exception.EmailExistsException;
 import com.sun.back.exception.LoginFailedException;
 import com.sun.back.exception.NicknameExistsException;
@@ -16,8 +14,6 @@ import org.springframework.stereotype.Service;
 import com.sun.back.entity.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -74,25 +70,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 유저가 속한 그룹 목록 조회
-        List<DiaryMember> members = diaryMemberRepository.findAllByUserWithGroup(user);
-
-        // DTO  변환
-        List<GroupDiaryResponse> groupDiaryResponses = members.stream()
-                .map(m -> new GroupDiaryResponse(
-                        m.getDiaryGroup().getId(),
-                        m.getDiaryGroup().getTitle(),
-                        m.getDiaryGroup().getType(),
-                        m.getRole()
-                ))
-                .toList();
-
-        return new GetUserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getNickname(),
-                groupDiaryResponses
-        );
+        return GetUserResponse.from(user);
     }
 
     // 닉네임 수정

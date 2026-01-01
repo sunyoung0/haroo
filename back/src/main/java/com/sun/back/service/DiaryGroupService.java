@@ -1,5 +1,6 @@
 package com.sun.back.service;
 
+import com.sun.back.dto.diary.GetMyGroupResponse;
 import com.sun.back.dto.diary.GroupCreateRequest;
 import com.sun.back.entity.User;
 import com.sun.back.entity.diary.DiaryGroup;
@@ -11,6 +12,8 @@ import com.sun.back.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,5 +47,25 @@ public class DiaryGroupService {
         diaryMemberRepository.save(member);
 
         return savedGroup.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetMyGroupResponse> getMyGroup(String email) {
+        // 생성자 유저 찾기
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 유저가 참여하고 있는 다이어리 그룹 목록 불러오기
+        List<DiaryMember> members = diaryMemberRepository.findAllByUserWithGroup(user);
+
+        return members.stream()
+                .map(m -> new GetMyGroupResponse(
+                        m.getDiaryGroup().getId(),
+                        m.getDiaryGroup().getTitle(),
+                        m.getRole(),
+                        m.getDiaryGroup().getType(),
+                        0L // 일단 0으로 두고, 나중에 멤버 수 집계 로직 추가 가능
+                ))
+                .toList();
     }
 }
