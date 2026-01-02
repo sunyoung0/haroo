@@ -11,4 +11,6 @@ public interface DiaryMemberRepository  extends JpaRepository<DiaryMember, Long>
     // 특정 유저가 속한 모든 멤버 관계 정보를 가져옴 (그룹 정보까지)
     @Query("SELECT m FROM DiaryMember m JOIN FETCH m.diaryGroup WHERE m.user = :user")
     List<DiaryMember> findAllByUserWithGroup(User user);
+
+    boolean existsByUserAndDiaryGroup_Id(User user, Long groupId);
 }

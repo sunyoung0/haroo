@@ -1,6 +1,7 @@
 package com.sun.back.entity.diary;
 
 import com.sun.back.entity.User;
+import com.sun.back.entity.enums.FeelingType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,9 +34,9 @@ public class Diary {    // 일기
 
 //    private String imageUrl;
 
-    private String feelingType; // 감정
+    private FeelingType feelingType; // 감정
 
-    private boolean isTemp; // 임시 저장 여부
+//    private boolean isTemp; // 임시 저장 여부
 
     private LocalDateTime createdAt;
 
@@ -46,24 +47,18 @@ public class Diary {    // 일기
     private List<DiaryLike> likes = new ArrayList<>();
 
     @Builder
-    public Diary(DiaryGroup diaryGroup, User user, String title, String content, String feelingType, boolean isTemp, LocalDateTime createdAt) {
+    public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp, LocalDateTime createdAt) {
         this.diaryGroup = diaryGroup;
         this.user = user;
         this.title = title;
         this.content = content;
         this.feelingType = feelingType;
-        this.isTemp = false;
         this.createdAt = LocalDateTime.now();
     }
 
-    public void updateDiary(String title, String content, String feelingType, boolean isTemp) {
+    public void updateDiary(String title, String content, FeelingType feelingType) {
         this.title = title;
         this.content = content;
         this.feelingType = feelingType;
-        this.isTemp = isTemp;
-    }
-
-    public void publish() {
-        this.isTemp = false;
     }
 }
