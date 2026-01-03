@@ -1,15 +1,13 @@
 package com.sun.back.controller;
 
-import com.sun.back.dto.diary.GetMyGroupResponse;
-import com.sun.back.dto.diary.GroupCreateRequest;
+import com.sun.back.dto.diaryGroup.GetMyGroupResponse;
+import com.sun.back.dto.diaryGroup.GroupCreateRequest;
+import com.sun.back.dto.diaryGroup.NoticeUpdateRequest;
 import com.sun.back.service.DiaryGroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,6 +29,25 @@ public class DiaryGroupController {
     public ResponseEntity<List<GetMyGroupResponse>> getGroup(@AuthenticationPrincipal String email) {
         return ResponseEntity.ok(diaryGroupService.getMyGroup(email));
     }
+
+    // 다이어리 공지 수정
+    @PutMapping("/group/updateNotice/{groupId}")
+    public ResponseEntity<Void> updateNotice(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody NoticeUpdateRequest dto) {
+        diaryGroupService.updateNotice(email, groupId, dto.notice());
+        return ResponseEntity.ok().build();
+    }
+
+    // 다이어리 그룹 전체 삭제 (방장만 가능)
+    @DeleteMapping("/group/{groupId}")
+    public ResponseEntity<Void> deleteGroup(@AuthenticationPrincipal String email, @PathVariable Long groupId) {
+        diaryGroupService.deleteGroup(email, groupId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 다이어리 그룹 탈퇴 (멤버용)
+    @DeleteMapping("/groupLeave/{groupId}")
+    public ResponseEntity<Void> leaveGroup(@AuthenticationPrincipal String email, @PathVariable Long groupId) {
+        diaryGroupService.leaveGroup(email, groupId);
+        return ResponseEntity.ok().build();
+    }
 }
-
-

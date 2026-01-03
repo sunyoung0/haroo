@@ -32,7 +32,11 @@ public class DiaryGroup {   // 다이어리 종류(개인인지 공유인지)
     @JoinColumn(name = "created_by")
     private User user;
 
-    @OneToMany(mappedBy = "diaryGroup", cascade = CascadeType.ALL)
+    // 일기(Diary)와의 연관관계에 아래 옵션을 추가하세요.
+    @OneToMany(mappedBy = "diaryGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Diary> diaries = new ArrayList<>();
+
+    @OneToMany(mappedBy = "diaryGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryMember> members = new ArrayList<>();
 
     @Builder
@@ -42,6 +46,11 @@ public class DiaryGroup {   // 다이어리 종류(개인인지 공유인지)
         this.notice = notice;
         this.user = user;
         this.createdAt = LocalDateTime.now();
+    }
+
+    // 공지 수정
+    public void updateNotice(String notice) {
+        this.notice = notice;
     }
 }
 

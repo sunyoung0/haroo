@@ -1,4 +1,4 @@
-package com.sun.back.dto.diary;
+package com.sun.back.dto.diaryGroup;
 
 import com.sun.back.entity.enums.GroupType;
 
