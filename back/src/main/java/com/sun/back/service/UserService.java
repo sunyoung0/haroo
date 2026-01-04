@@ -1,15 +1,11 @@
 package com.sun.back.service;
 
 import com.sun.back.dto.user.*;
-import com.sun.back.exception.EmailExistsException;
-import com.sun.back.exception.LoginFailedException;
-import com.sun.back.exception.NicknameExistsException;
-import com.sun.back.repository.DiaryMemberRepository;
+import com.sun.back.exception.*;
 import com.sun.back.repository.UserRepository;
 import com.sun.back.security.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.sun.back.entity.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,19 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final DiaryMemberRepository diaryMemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     // 회원 가입
-    public ResponseEntity<User> signUp(SignUpRequest dto) {
+    public void signUp(SignUpRequest dto) {
 
         // 이메일 닉네임 중복 체크
         if (userRepository.existsByEmail(dto.email())) {
-            throw new EmailExistsException("이미 존재하는 이메일입니다.");
+            throw new ExistsException("이미 존재하는 이메일입니다.");
         }
         if (userRepository.existsByNickname(dto.nickname())) {
-            throw new NicknameExistsException("이미 존재하는 닉네임입니다.");
+            throw new ExistsException("이미 존재하는 닉네임입니다.");
         }
 
         User user = User.builder()
@@ -40,7 +35,8 @@ public class UserService {
                 .password(passwordEncoder.encode(dto.password()))
                 .nickname(dto.nickname())
                 .build();
-        return ResponseEntity.ok(userRepository.save(user));
+
+        userRepository.save(user);
     }
 
     // 로그인
@@ -68,7 +64,7 @@ public class UserService {
     public GetUserResponse getUser(String email) {
         // 유저 조회
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         return GetUserResponse.from(user);
     }
@@ -81,7 +77,7 @@ public class UserService {
 
         // 닉네임 중복 체크
         if(userRepository.existsByNickname(newNickname)) {
-            throw new NicknameExistsException("이미 사용 중인 닉네임입니다.");
+            throw new ExistsException("이미 사용 중인 닉네임입니다.");
         }
 
         user.updateNickname(newNickname);

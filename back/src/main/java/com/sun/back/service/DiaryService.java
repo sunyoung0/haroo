@@ -7,6 +7,8 @@ import com.sun.back.dto.diary.PatchDiaryRequest;
 import com.sun.back.entity.User;
 import com.sun.back.entity.diary.Diary;
 import com.sun.back.entity.diary.DiaryGroup;
+import com.sun.back.exception.DiaryAccessException;
+import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryGroupRepository;
 import com.sun.back.repository.DiaryMemberRepository;
 import com.sun.back.repository.DiaryRepository;
@@ -32,17 +34,17 @@ public class DiaryService {
 
         // 작성자 존재 확인
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 그룹 존재 확인
         DiaryGroup group = diaryGroupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("다이어리 그룹이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("다이어리 그룹이 존재하지 않습니다."));
 
         // 권한 체크 : 유저가 해당 그룹의 멤버인지 확인
         boolean isMember = diaryMemberRepository.existsByUserAndDiaryGroup_Id(user, groupId);
 
         if(!isMember) {
-            throw new RuntimeException("해당 다이어리에 글을 쓸 권한이 없습니다.");
+            throw new DiaryAccessException("해당 다이어리에 글을 쓸 권한이 없습니다.");
         }
 
         // 일기 저장
@@ -64,11 +66,11 @@ public class DiaryService {
     public List<GetDiaryListResponse> getGroupDiaries(String email, Long groupId) {
         // 작성자 조회
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 권한 체크
         if(!diaryMemberRepository.existsByUserAndDiaryGroup_Id(user,groupId)) {
-            throw new RuntimeException("해당 다이어리를 볼 권한이 없습니다.");
+            throw new DiaryAccessException("해당 다이어리를 볼 권한이 없습니다.");
         }
 
         // 해당 그룹 일기 리스트 불러오기
@@ -91,15 +93,15 @@ public class DiaryService {
     public GetDiaryDetailResponse getDiaryDetail(String email, Long diaryId) {
         // 작성자 조회
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 일기 조회
         Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 일기입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 일기입니다."));
 
         // 권한 체크
         if (!diaryMemberRepository.existsByUserAndDiaryGroup_Id(user, diary.getDiaryGroup().getId())) {
-            throw new RuntimeException("이 일기를 볼 권한이 없습니다.");
+            throw new DiaryAccessException("이 일기를 볼 권한이 없습니다.");
         }
 
         // DTO 변환 및 return
@@ -118,11 +120,11 @@ public class DiaryService {
     public void updateDiary(String email, Long diaryId, PatchDiaryRequest dto) {
         // 일기 조회
         Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 일기입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 일기입니다."));
 
         // 작성자 권한 체크 (로그인한 유저와 작성자가 같은지)
         if (!diary.getUser().getEmail().equals(email)) {
-            throw new RuntimeException("본인이 작성한 일기만 수정 가능합니다.");
+            throw new DiaryAccessException("본인이 작성한 일기만 수정 가능합니다.");
         }
 
         // 엔티티 업데이트
@@ -132,13 +134,12 @@ public class DiaryService {
     @Transactional
     public void deleteDiary(String email, Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 일기입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 일기입니다."));
 
         // 작성자 권한 체크 (로그인한 유저와 작성자가 같은지)
         if (!diary.getUser().getEmail().equals(email)) {
-            throw new RuntimeException("본인이 작성한 일기만 수정 가능합니다.");
+            throw new DiaryAccessException("본인이 작성한 일기만 수정 가능합니다.");
         }
-
         diaryRepository.delete(diary);
     }
 

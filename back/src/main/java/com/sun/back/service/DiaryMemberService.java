@@ -7,6 +7,9 @@ import com.sun.back.entity.diary.DiaryGroup;
 import com.sun.back.entity.diary.DiaryMember;
 import com.sun.back.entity.enums.GroupType;
 import com.sun.back.entity.enums.MemberRole;
+import com.sun.back.exception.DiaryAccessException;
+import com.sun.back.exception.DiaryGroupException;
+import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryGroupRepository;
 import com.sun.back.repository.DiaryMemberRepository;
 import com.sun.back.repository.UserRepository;
@@ -29,23 +32,23 @@ public class DiaryMemberService {
     public void inviteMember(String ownerEmail, Long groupId, MemberInviteRequest dto) {
         // 방장 권한 확인
         DiaryMember owner = diaryMemberRepository.findByUser_EmailAndDiaryGroup_Id(ownerEmail, groupId)
-                .orElseThrow(() -> new RuntimeException("해당 그룹에 접근 권한이 없는 유저입니다."));
+                .orElseThrow(() -> new DiaryAccessException("해당 그룹에 접근 권한이 없는 유저입니다."));
 
         if (owner.getDiaryGroup().getType() != GroupType.SHARED) {
-            throw new RuntimeException("개인 다이어리는 멤버 초대를 할 수 없습니다.");
+            throw new DiaryGroupException("개인 다이어리는 멤버 초대를 할 수 없습니다.");
         }
 
         if (owner.getRole() != MemberRole.OWNER) {
-            throw new RuntimeException("초대 권한이 없습니다.");
+            throw new DiaryAccessException("초대 권한이 없습니다.");
         }
 
         // 초대할 유저가 존재하는지 확인
         User invitee = userRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new RuntimeException("초대하려는 멤버가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("초대하려는 멤버가 존재하지 않습니다."));
 
         // 이미 그룹 멤버인지 확인
         if (diaryMemberRepository.existsByUserAndDiaryGroup_Id(invitee, groupId)) {
-            throw new RuntimeException("이미 그룹에 가입되어있는 멤버입니다.");
+            throw new DiaryGroupException("이미 그룹에 가입되어있는 멤버입니다.");
         }
 
         // 멤버로 추가
@@ -64,7 +67,7 @@ public class DiaryMemberService {
     public List<GroupMemberListResponse> getGroupMemberList(Long groupId) {
         // 그룹 존재 여부 확인
         if (!diaryGroupRepository.existsById(groupId)) {
-            throw new RuntimeException("해당 다이어리가 존재하지 않습니다.");
+            throw new ResourceNotFoundException("해당 다이어리가 존재하지 않습니다.");
         }
 
         // 해당 그룹에 속한 모든 멤버 조회

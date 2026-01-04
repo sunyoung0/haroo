@@ -7,6 +7,8 @@ import com.sun.back.entity.User;
 import com.sun.back.entity.diary.DiaryGroup;
 import com.sun.back.entity.diary.DiaryMember;
 import com.sun.back.entity.enums.MemberRole;
+import com.sun.back.exception.DiaryGroupException;
+import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryGroupRepository;
 import com.sun.back.repository.DiaryMemberRepository;
 import com.sun.back.repository.UserRepository;
@@ -29,7 +31,7 @@ public class DiaryGroupService {
     public Long CreateGroup(String email, GroupCreateRequest dto) {
         // 생성자 유저 찾기
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 다이어리 그룹 엔티티 생성 및 저장
         DiaryGroup group = DiaryGroup.builder()
@@ -56,7 +58,7 @@ public class DiaryGroupService {
     public List<GetMyGroupResponse> getMyGroup(String email) {
         // 생성자 유저 찾기
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 유저가 참여하고 있는 다이어리 그룹 목록 불러오기
         List<DiaryMember> members = diaryMemberRepository.findAllByUserWithGroup(user);
@@ -77,7 +79,7 @@ public class DiaryGroupService {
     public void updateNotice(String email, Long groupId, String newNotice) {
         // 해당 그룹 멤버인지 확인
         diaryMemberRepository.findByUser_EmailAndDiaryGroup_Id(email, groupId)
-                .orElseThrow(() -> new RuntimeException("해당 그룹 멤버가 아닙니다."));
+                .orElseThrow(() -> new DiaryGroupException("해당 그룹 멤버가 아닙니다."));
 
         // 공지 수정
         DiaryGroup group = diaryGroupRepository.findById(groupId).orElseThrow();
@@ -89,14 +91,14 @@ public class DiaryGroupService {
     public void deleteGroup(String email, Long groupId) {
         // 그룹 조회
         DiaryGroup group = diaryGroupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("삭제하려는 그룹이 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("삭제하려는 그룹이 없습니다."));
 
         // 권한 확인 : 방장만 삭제 가능하므로 OWNER인지 확인
         DiaryMember member = diaryMemberRepository.findByUser_EmailAndDiaryGroup_Id(email, groupId)
-                .orElseThrow(() -> new RuntimeException("그룹 멤버가 아닙니다."));
+                .orElseThrow(() -> new DiaryGroupException("그룹 멤버가 아닙니다."));
 
         if (member.getRole() != MemberRole.OWNER) {
-            throw new RuntimeException("방장만 그룹을 삭제할 수 있습니다.");
+            throw new DiaryGroupException("방장만 그룹을 삭제할 수 있습니다.");
         }
 
         // 그룹 삭제 (연관된 일기, 멤버 모두 삭제)
@@ -108,11 +110,11 @@ public class DiaryGroupService {
     public void leaveGroup(String email, Long groupId) {
         // 탈퇴하려는 멤버 데이터 조회
         DiaryMember member = diaryMemberRepository.findByUser_EmailAndDiaryGroup_Id(email, groupId)
-                .orElseThrow(() -> new RuntimeException("해당 그룹의 멤버가 아닙니다."));
+                .orElseThrow(() -> new DiaryGroupException("해당 그룹의 멤버가 아닙니다."));
 
         // 방장은 탈퇴 불가능
         if (member.getRole() == MemberRole.OWNER) {
-            throw new RuntimeException("방장은 그룹을 탈퇴할 수 없습니다.");
+            throw new DiaryGroupException("방장은 그룹을 탈퇴할 수 없습니다.");
         }
 
         // 멤버만 삭제

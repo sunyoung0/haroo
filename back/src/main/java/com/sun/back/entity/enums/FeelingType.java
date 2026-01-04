@@ -1,5 +1,11 @@
 package com.sun.back.entity.enums;
 
 public enum FeelingType {
-    HAPPY, SAD
+    HAPPY,      // 기쁨
+    SAD,        // 슬픔
+    ANGRY,      // 화남
+    ANXIOUS,    // 불안
+    CLAM,       // 평온
+    TIRED,      // 피곤
+    EXCITED     // 설렘
 }

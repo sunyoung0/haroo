@@ -17,8 +17,9 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signUp")
-    public ResponseEntity<User> signUp(@Valid @RequestBody SignUpRequest dto) {
-        return userService.signUp(dto);
+    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest dto) {
+        userService.signUp(dto);
+        return ResponseEntity.ok().build();
     }
 
     // 로그인
@@ -40,11 +41,4 @@ public class UserController {
         userService.updateNickname(email, dto.nickname());
         return ResponseEntity.ok("닉네임이 성공적으로 수정되었습니다.");
     }
-
-    // TODO : 토큰 테스트용 나중에 지우기
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("토큰 인증 성공");
-    }
-
 }
