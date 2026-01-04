@@ -63,7 +63,7 @@ public class DiaryService {
 
     // 해당 그룹에서 일기 리스트 조회
     @Transactional(readOnly = true)
-    public List<GetDiaryListResponse> getGroupDiaries(String email, Long groupId) {
+    public List<GetDiaryListResponse> getGroupDiaries(String email, Long groupId, String date, Long memberId) {
         // 작성자 조회
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
@@ -74,7 +74,7 @@ public class DiaryService {
         }
 
         // 해당 그룹 일기 리스트 불러오기
-        List<Diary> diaries = diaryRepository.findAllByGroupIdWithUser(groupId);
+        List<Diary> diaries = diaryRepository.findFilteredDiaries(groupId, memberId, date);
 
         return diaries.stream()
                 .map(d -> new GetDiaryListResponse(
@@ -142,5 +142,4 @@ public class DiaryService {
         }
         diaryRepository.delete(diary);
     }
-
 }

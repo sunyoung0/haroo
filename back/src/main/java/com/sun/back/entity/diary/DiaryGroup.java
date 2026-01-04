@@ -1,7 +1,7 @@
 package com.sun.back.entity.diary;
 
 import com.sun.back.entity.User;
-import com.sun.back.entity.enums.GroupType;
+import com.sun.back.enums.GroupType;
 import jakarta.persistence.*;
 import lombok.*;
 

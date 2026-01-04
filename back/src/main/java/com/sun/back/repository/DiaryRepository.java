@@ -14,4 +14,9 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.diaryGroup.id = :groupId ORDER BY d.createdAt DESC")
     List<Diary> findAllByGroupIdWithUser(@Param("groupId") Long groupId);
+
+    @Query("SELECT d FROM Diary d WHERE d.diaryGroup.id = :groupId " +
+            "AND (:userId IS NULL OR d.user.id = :userId) " +
+            "AND (:createdAt IS NULL OR FUNCTION('DATE_FORMAT', d.createdAt, '%Y-%m-%d') = :createdAt)")
+    List<Diary> findFilteredDiaries(@Param("groupId") Long groupId, @Param("userId") Long memberId, @Param("createdAt") String date);
 }

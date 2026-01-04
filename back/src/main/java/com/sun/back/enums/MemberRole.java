@@ -1,4 +1,4 @@
-package com.sun.back.entity.enums;
+package com.sun.back.enums;
 
 public enum MemberRole {
     OWNER, MEMBER

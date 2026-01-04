@@ -2,11 +2,10 @@ package com.sun.back.service;
 
 import com.sun.back.dto.diaryGroup.GetMyGroupResponse;
 import com.sun.back.dto.diaryGroup.GroupCreateRequest;
-import com.sun.back.dto.diaryGroup.MemberInviteRequest;
 import com.sun.back.entity.User;
 import com.sun.back.entity.diary.DiaryGroup;
 import com.sun.back.entity.diary.DiaryMember;
-import com.sun.back.entity.enums.MemberRole;
+import com.sun.back.enums.MemberRole;
 import com.sun.back.exception.DiaryGroupException;
 import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryGroupRepository;

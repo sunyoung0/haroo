@@ -1,7 +1,7 @@
 package com.sun.back.entity.diary;
 
 import com.sun.back.entity.User;
-import com.sun.back.entity.enums.FeelingType;
+import com.sun.back.enums.FeelingType;
 import jakarta.persistence.*;
 import lombok.*;
 
