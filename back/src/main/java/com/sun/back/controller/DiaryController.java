@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -19,19 +20,19 @@ public class DiaryController {
     private final DiaryService diaryService;
 
     // 일기 작성
-    @PostMapping("/createDiary/{groupId}")
+    @PostMapping("/diaries/{groupId}")
     public ResponseEntity<String> crateDiary(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody CreateDiaryRequest dto) {
         return ResponseEntity.ok(diaryService.createDiary(email, groupId, dto));
     }
 
     // 해당 그룹의 일기 리스트 불러오기
-    @GetMapping("/getDiaries/{groupId}")
-    public ResponseEntity<List<GetDiaryListResponse>> getDiaries(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestParam(required = false) String createdAt, @RequestParam(required = false) Long userId) {
-        return ResponseEntity.ok(diaryService.getGroupDiaries(email, groupId, createdAt, userId));
+    @GetMapping("/diaries/{groupId}")
+    public ResponseEntity<List<GetDiaryListResponse>> getDiaries(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestParam(required = false) LocalDate diaryDate, @RequestParam(required = false) Long userId) {
+        return ResponseEntity.ok(diaryService.getGroupDiaries(email, groupId, diaryDate, userId));
     }
 
     // 일기 상세 내용 조회
-    @GetMapping("/getDiariesDetail/{diaryId}")
+    @GetMapping("/diaries/detail/{diaryId}")
     public ResponseEntity<GetDiaryDetailResponse> getDiaryDetail(@AuthenticationPrincipal String email, @PathVariable Long diaryId) {
         return ResponseEntity.ok(diaryService.getDiaryDetail(email, diaryId));
     }

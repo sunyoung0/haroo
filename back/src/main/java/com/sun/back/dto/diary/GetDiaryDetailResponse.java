@@ -10,6 +10,8 @@ public record GetDiaryDetailResponse(
    String content,
    FeelingType feelingType,
    LocalDateTime createdAt,
-   String writerNickname
-   // 추후에 댓글, 좋아요 리스트 포함
+   String writerNickname,
+   Integer commentCount,
+   Integer likeCount,
+   boolean isLike
 ) {}

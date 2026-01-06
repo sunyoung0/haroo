@@ -9,14 +9,13 @@ import com.sun.back.entity.diary.Diary;
 import com.sun.back.entity.diary.DiaryGroup;
 import com.sun.back.exception.DiaryAccessException;
 import com.sun.back.exception.ResourceNotFoundException;
-import com.sun.back.repository.DiaryGroupRepository;
-import com.sun.back.repository.DiaryMemberRepository;
-import com.sun.back.repository.DiaryRepository;
-import com.sun.back.repository.UserRepository;
+import com.sun.back.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,6 +26,8 @@ public class DiaryService {
     private final DiaryGroupRepository diaryGroupRepository;
     private final DiaryMemberRepository diaryMemberRepository;
     private final UserRepository userRepository;
+    private final DiaryCommentRepository diaryCommentRepository;
+    private final DiaryLikeRepository diaryLikeRepository;
 
     // 일기 작성
     @Transactional
@@ -47,12 +48,15 @@ public class DiaryService {
             throw new DiaryAccessException("해당 다이어리에 글을 쓸 권한이 없습니다.");
         }
 
+        LocalDate targetDate = (dto.diaryDate() == null) ? LocalDate.now() : dto.diaryDate();
+
         // 일기 저장
         Diary diary = Diary.builder()
                 .diaryGroup(group)
                 .user(user)
                 .title(dto.title())
                 .content(dto.content())
+                .diaryDate(dto.diaryDate())
                 .feelingType(dto.feelingType())
                 .build();
 
@@ -63,7 +67,7 @@ public class DiaryService {
 
     // 해당 그룹에서 일기 리스트 조회
     @Transactional(readOnly = true)
-    public List<GetDiaryListResponse> getGroupDiaries(String email, Long groupId, String date, Long memberId) {
+    public List<GetDiaryListResponse> getGroupDiaries(String email, Long groupId, LocalDate diaryDate, Long memberId) {
         // 작성자 조회
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
@@ -74,15 +78,17 @@ public class DiaryService {
         }
 
         // 해당 그룹 일기 리스트 불러오기
-        List<Diary> diaries = diaryRepository.findFilteredDiaries(groupId, memberId, date);
+        List<Diary> diaries = diaryRepository.findFilteredDiaries(groupId, memberId, diaryDate);
 
         return diaries.stream()
                 .map(d -> new GetDiaryListResponse(
                         d.getId(),
+                        d.getDiaryGroup().getNotice(),
                         d.getTitle(),
                         d.getUser().getNickname(),
                         d.getFeelingType(),
                         d.getCreatedAt(),
+                        d.getDiaryDate(),
                         d.getComments().size(),
                         d.getLikes().size()
                 )).toList();
@@ -104,6 +110,19 @@ public class DiaryService {
             throw new DiaryAccessException("이 일기를 볼 권한이 없습니다.");
         }
 
+        // 전체 댓글 개수 조회
+        int commentCount = diaryCommentRepository.countByDiaryId(diaryId);
+
+        // 좋아요 정보 가져오기
+        // 전체 좋아요 개수 조회
+        int likeCount = diaryLikeRepository.countByDiaryId(diaryId);
+
+        // 현재 접속한 유저가 좋아요 눌렀는 지 확인
+        boolean isLiked = false;
+        if (email != null) {
+            isLiked = diaryLikeRepository.existsByDiaryAndUser_email(diary, email);
+        }
+
         // DTO 변환 및 return
         return new GetDiaryDetailResponse(
                 diary.getId(),
@@ -111,7 +130,10 @@ public class DiaryService {
                 diary.getContent(),
                 diary.getFeelingType(),
                 diary.getCreatedAt(),
-                diary.getUser().getNickname()
+                diary.getUser().getNickname(),
+                commentCount,
+                likeCount,
+                isLiked
         );
     }
 

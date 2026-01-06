@@ -11,4 +11,6 @@ public interface DiaryCommentRepository extends JpaRepository<DiaryComment, Long
 
     @Query("SELECT c FROM DiaryComment c JOIN FETCH c.user WHERE c.diary.id = :diaryId ORDER BY c.createdAt ASC")
     List<DiaryComment> findAllByDiaryIdOrderByCreatedAtAsc(@Param("diaryId") Long diaryId);
+
+    int countByDiaryId(Long diaryId);
 }

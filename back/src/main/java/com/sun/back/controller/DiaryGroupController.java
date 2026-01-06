@@ -18,34 +18,34 @@ public class DiaryGroupController {
     private final DiaryGroupService diaryGroupService;
 
     // 다이어리 그룹(개인/ 공유) 생성
-    @PostMapping("/group")
+    @PostMapping("/groups")
     public ResponseEntity<Long> createGroup(@AuthenticationPrincipal String email, @RequestBody GroupCreateRequest dto) {
         Long groupId = diaryGroupService.CreateGroup(email, dto);
         return ResponseEntity.ok(groupId);
     }
 
     // 다이어리 그룹(개인/공유) 가져오기
-    @GetMapping("/group/me")
+    @GetMapping("/groups")
     public ResponseEntity<List<GetMyGroupResponse>> getGroup(@AuthenticationPrincipal String email) {
         return ResponseEntity.ok(diaryGroupService.getMyGroup(email));
     }
 
     // 다이어리 공지 수정
-    @PutMapping("/group/updateNotice/{groupId}")
+    @PutMapping("/groups/{group_id}")
     public ResponseEntity<Void> updateNotice(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody NoticeUpdateRequest dto) {
         diaryGroupService.updateNotice(email, groupId, dto.notice());
         return ResponseEntity.ok().build();
     }
 
     // 다이어리 그룹 전체 삭제 (방장만 가능)
-    @DeleteMapping("/group/{groupId}")
+    @DeleteMapping("/groups/{groupId}")
     public ResponseEntity<Void> deleteGroup(@AuthenticationPrincipal String email, @PathVariable Long groupId) {
         diaryGroupService.deleteGroup(email, groupId);
         return ResponseEntity.ok().build();
     }
 
     // 다이어리 그룹 탈퇴 (멤버용)
-    @DeleteMapping("/groupLeave/{groupId}")
+    @DeleteMapping("/groups/leave/{groupId}")
     public ResponseEntity<Void> leaveGroup(@AuthenticationPrincipal String email, @PathVariable Long groupId) {
         diaryGroupService.leaveGroup(email, groupId);
         return ResponseEntity.ok().build();

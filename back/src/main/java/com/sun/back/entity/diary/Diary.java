@@ -5,6 +5,7 @@ import com.sun.back.enums.FeelingType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,8 @@ public class Diary {    // 일기
 
 //    private boolean isTemp; // 임시 저장 여부
 
+    private LocalDate diaryDate;
+
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL)
@@ -47,11 +50,12 @@ public class Diary {    // 일기
     private List<DiaryLike> likes = new ArrayList<>();
 
     @Builder
-    public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp, LocalDateTime createdAt) {
+    public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp,LocalDate diaryDate, LocalDateTime createdAt) {
         this.diaryGroup = diaryGroup;
         this.user = user;
         this.title = title;
         this.content = content;
+        this.diaryDate = diaryDate;
         this.feelingType = feelingType;
         this.createdAt = LocalDateTime.now();
     }

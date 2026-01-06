@@ -16,27 +16,27 @@ public class UserController {
     private final UserService userService;
 
     // 회원가입
-    @PostMapping("/signUp")
+    @PostMapping("/auth/register")
     public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest dto) {
         userService.signUp(dto);
         return ResponseEntity.ok().build();
     }
 
     // 로그인
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest dto) {
         LoginResponse response = userService.login(dto);
         return ResponseEntity.ok(response);
     }
 
     // 회원 정보 조회
-    @GetMapping("/user")
+    @GetMapping("/users/me")
     public ResponseEntity<GetUserResponse> getUser(@AuthenticationPrincipal String email) {
         return ResponseEntity.ok(userService.getUser(email));
     }
 
     // 닉네임 수정
-    @PatchMapping("/nickname")
+    @PatchMapping("/users/me")
     public ResponseEntity<String> updateNickname(@AuthenticationPrincipal String email, @RequestBody NicknameRequest dto) {
         userService.updateNickname(email, dto.nickname());
         return ResponseEntity.ok("닉네임이 성공적으로 수정되었습니다.");

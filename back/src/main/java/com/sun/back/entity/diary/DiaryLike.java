@@ -34,4 +34,9 @@ public class DiaryLike {
     private User user;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public DiaryLike(Diary diary, User user) {
+        this.diary = diary;
+        this.user = user;
+    }
 }
