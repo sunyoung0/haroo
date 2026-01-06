@@ -48,8 +48,6 @@ public class DiaryService {
             throw new DiaryAccessException("해당 다이어리에 글을 쓸 권한이 없습니다.");
         }
 
-        LocalDate targetDate = (dto.diaryDate() == null) ? LocalDate.now() : dto.diaryDate();
-
         // 일기 저장
         Diary diary = Diary.builder()
                 .diaryGroup(group)
@@ -153,6 +151,7 @@ public class DiaryService {
         diary.updateDiary(dto.title(), dto.content(), dto.feelingType());
     }
 
+    // 일기 삭제
     @Transactional
     public void deleteDiary(String email, Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
@@ -163,5 +162,11 @@ public class DiaryService {
             throw new DiaryAccessException("본인이 작성한 일기만 수정 가능합니다.");
         }
         diaryRepository.delete(diary);
+    }
+
+    // 캘린더용 날짜 조회
+    @Transactional(readOnly = true)
+    public List<String> getDiaryDatesInMonth(Long groupId, String diaryDate) {
+        return diaryRepository.findByEntryDatesByMonth(groupId, diaryDate);
     }
 }

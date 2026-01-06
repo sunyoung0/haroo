@@ -12,7 +12,7 @@ public record GetDiaryListResponse(
         String nickname,
         FeelingType feelingType,
         LocalDateTime createdAt,
-        LocalDate diaryDate,
+        String diaryDate,
         Integer commentCount,
         Integer likeCount
 ) {}

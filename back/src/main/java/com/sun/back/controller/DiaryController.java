@@ -51,4 +51,12 @@ public class DiaryController {
         return ResponseEntity.ok().build();
     }
 
+    // 캘린더용 날짜 조회
+    @GetMapping("/diaries/dates/{groupId}")
+    public ResponseEntity<List<String>> getDiaryDates(
+            @PathVariable Long groupId,
+            @RequestParam String diaryDate
+    ) {
+        return ResponseEntity.ok(diaryService.getDiaryDatesInMonth(groupId, diaryDate));
+    }
 }

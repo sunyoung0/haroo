@@ -39,7 +39,8 @@ public class Diary {    // 일기
 
 //    private boolean isTemp; // 임시 저장 여부
 
-    private LocalDate diaryDate;
+    @Column(length = 10)
+    private String diaryDate;
 
     private LocalDateTime createdAt;
 
@@ -50,7 +51,7 @@ public class Diary {    // 일기
     private List<DiaryLike> likes = new ArrayList<>();
 
     @Builder
-    public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp,LocalDate diaryDate, LocalDateTime createdAt) {
+    public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp,String diaryDate, LocalDateTime createdAt) {
         this.diaryGroup = diaryGroup;
         this.user = user;
         this.title = title;
