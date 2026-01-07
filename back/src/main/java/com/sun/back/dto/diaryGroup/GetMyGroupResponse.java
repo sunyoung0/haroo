@@ -8,5 +8,5 @@ public record GetMyGroupResponse(
         String title,
         MemberRole role,
         GroupType groupType,
-        Long membersCount
+        Integer membersCount
 ){}

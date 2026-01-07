@@ -1,5 +1,6 @@
 package com.sun.back.entity.diary;
 
+import com.sun.back.entity.BaseTimeEntity;
 import com.sun.back.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class DiaryComment {
+public class DiaryComment extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,14 +29,11 @@ public class DiaryComment {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private LocalDateTime createdAt;
-
     @Builder
-    public DiaryComment(Diary diary, User user, String content, LocalDateTime createdAt) {
+    public DiaryComment(Diary diary, User user, String content) {
         this.diary = diary;
         this.user = user;
         this.content = content;
-        this.createdAt = LocalDateTime.now();
     }
 
     // 댓글 수정

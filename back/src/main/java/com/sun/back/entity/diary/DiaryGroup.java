@@ -1,5 +1,6 @@
 package com.sun.back.entity.diary;
 
+import com.sun.back.entity.BaseTimeEntity;
 import com.sun.back.entity.User;
 import com.sun.back.enums.GroupType;
 import jakarta.persistence.*;
@@ -12,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class DiaryGroup {   // 다이어리 종류(개인인지 공유인지)
+public class DiaryGroup extends BaseTimeEntity {   // 다이어리 종류(개인인지 공유인지)
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +27,6 @@ public class DiaryGroup {   // 다이어리 종류(개인인지 공유인지)
 
     private String notice;
 
-    private LocalDateTime createdAt;
-
     @ManyToOne(fetch = FetchType.LAZY)  // 작성자의 정보를 바로 가져올 필요가 없다면 조회하지 않고 미뤄둠
     @JoinColumn(name = "created_by")
     private User user;
@@ -40,12 +39,11 @@ public class DiaryGroup {   // 다이어리 종류(개인인지 공유인지)
     private List<DiaryMember> members = new ArrayList<>();
 
     @Builder
-    public DiaryGroup(String title, GroupType type, String notice, User user, LocalDateTime createdAt) {
+    public DiaryGroup(String title, GroupType type, String notice, User user) {
         this.title = title;
         this.type = type;
         this.notice = notice;
         this.user = user;
-        this.createdAt = LocalDateTime.now();
     }
 
     // 공지 수정

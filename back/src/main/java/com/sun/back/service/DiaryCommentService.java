@@ -48,7 +48,6 @@ public class DiaryCommentService {
                 .content(dto.content())
                 .diary(diary)
                 .user(user)
-                .createdAt(LocalDateTime.now())
                 .build();
 
         diaryCommentRepository.save(comment);
@@ -73,8 +72,7 @@ public class DiaryCommentService {
                 .map(c -> new GetCommentResponse(
                         c.getId(),
                         c.getContent(),
-                        c.getUser().getNickname(),
-                        c.getCreatedAt()
+                        c.getUser().getNickname()
                 )).toList();
     }
 

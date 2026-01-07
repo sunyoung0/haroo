@@ -1,5 +1,6 @@
 package com.sun.back.entity.diary;
 
+import com.sun.back.entity.BaseTimeEntity;
 import com.sun.back.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
                 )
         }
 )
-public class DiaryLike {
+public class DiaryLike extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,8 +33,6 @@ public class DiaryLike {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     public DiaryLike(Diary diary, User user) {
         this.diary = diary;

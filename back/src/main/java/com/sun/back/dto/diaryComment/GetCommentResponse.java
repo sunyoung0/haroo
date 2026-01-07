@@ -5,6 +5,5 @@ import java.time.LocalDateTime;
 public record GetCommentResponse(
         Long id,
         String content,
-        String nickname,
-        LocalDateTime createdAt
+        String nickname
 ) {}

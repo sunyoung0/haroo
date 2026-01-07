@@ -1,11 +1,11 @@
 package com.sun.back.entity.diary;
 
+import com.sun.back.entity.BaseTimeEntity;
 import com.sun.back.entity.User;
 import com.sun.back.enums.FeelingType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Diary {    // 일기
+public class Diary extends BaseTimeEntity {    // 일기
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,8 +42,6 @@ public class Diary {    // 일기
     @Column(length = 10)
     private String diaryDate;
 
-    private LocalDateTime createdAt;
-
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL)
     private List<DiaryComment> comments = new ArrayList<>();
 
@@ -51,14 +49,13 @@ public class Diary {    // 일기
     private List<DiaryLike> likes = new ArrayList<>();
 
     @Builder
-    public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp,String diaryDate, LocalDateTime createdAt) {
+    public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp, String diaryDate) {
         this.diaryGroup = diaryGroup;
         this.user = user;
         this.title = title;
         this.content = content;
         this.diaryDate = diaryDate;
         this.feelingType = feelingType;
-        this.createdAt = LocalDateTime.now();
     }
 
     public void updateDiary(String title, String content, FeelingType feelingType) {

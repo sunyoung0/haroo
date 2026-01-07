@@ -17,14 +17,14 @@ public class DiaryMemberController {
     private final DiaryMemberService diaryMemberService;
 
     // 다이어리 그룹 멤버 초대
-    @PostMapping("/groups/members/{group_id}")
+    @PostMapping("/groups/members/{groupId}")
     public ResponseEntity<Void> inviteMember(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody MemberInviteRequest dto) {
         diaryMemberService.inviteMember(email, groupId, dto);
         return ResponseEntity.ok().build();
     }
 
     // 다이어리 그룹 멤버 조회
-    @GetMapping("/groups/members/{group_id}")
+    @GetMapping("/groups/members/{groupId}")
     public ResponseEntity<List<GroupMemberListResponse>> getGroupMemberList(@PathVariable Long groupId) {
         return ResponseEntity.ok(diaryMemberService.getGroupMemberList(groupId));
     }

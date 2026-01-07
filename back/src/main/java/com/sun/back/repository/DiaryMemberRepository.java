@@ -20,4 +20,6 @@ public interface DiaryMemberRepository  extends JpaRepository<DiaryMember, Long>
     List<DiaryMember> findAllByDiaryGroup_Id(Long groupId);
 
     boolean existsByUser_EmailAndDiaryGroup_Id(String email, Long id);
+
+    Integer countByDiaryGroup_Id(Long groupId);
 }

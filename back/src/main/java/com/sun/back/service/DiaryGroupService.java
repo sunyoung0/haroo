@@ -62,14 +62,22 @@ public class DiaryGroupService {
         // 유저가 참여하고 있는 다이어리 그룹 목록 불러오기
         List<DiaryMember> members = diaryMemberRepository.findAllByUserWithGroup(user);
 
+
         return members.stream()
-                .map(m -> new GetMyGroupResponse(
-                        m.getDiaryGroup().getId(),
-                        m.getDiaryGroup().getTitle(),
-                        m.getRole(),
-                        m.getDiaryGroup().getType(),
-                        0L // 일단 0으로 두고, 나중에 멤버 수 집계 로직 추가 가능
-                ))
+                .map(m -> {
+                    Long groupId = m.getDiaryGroup().getId();
+
+                    // 그룹 멤버수 계산
+                    Integer memberCount = diaryMemberRepository.countByDiaryGroup_Id(groupId);
+
+                    return new GetMyGroupResponse(
+                            m.getDiaryGroup().getId(),
+                            m.getDiaryGroup().getTitle(),
+                            m.getRole(),
+                            m.getDiaryGroup().getType(),
+                            memberCount
+                    );
+                })
                 .toList();
     }
 
