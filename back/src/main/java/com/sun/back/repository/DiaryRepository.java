@@ -15,6 +15,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     // 1. 일기 리스트 조회용 (전체 객체 반환)
     @Query("SELECT d FROM Diary d WHERE d.diaryGroup.id = :groupId " +
+            "AND d.isTemp = false " + // 이 조건이 있어야 임시 저장만 된 글들을 제외하고 불러올 수 있음
             "AND (:userId IS NULL OR d.user.id = :userId) " +
             "AND (:diaryDate IS NULL OR d.diaryDate LIKE CONCAT(:diaryDate, '%')) " +
             "ORDER BY d.diaryDate DESC, d.createdAt DESC")

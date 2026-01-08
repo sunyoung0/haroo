@@ -37,7 +37,7 @@ public class Diary extends BaseTimeEntity {    // 일기
 
     private FeelingType feelingType; // 감정
 
-//    private boolean isTemp; // 임시 저장 여부
+    private boolean isTemp; // 임시 저장 여부
 
     @Column(length = 10)
     private String diaryDate;
@@ -48,6 +48,11 @@ public class Diary extends BaseTimeEntity {    // 일기
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL)
     private List<DiaryLike> likes = new ArrayList<>();
 
+    // 임시 저장 해제
+    public void publish() {
+        this.isTemp = false;
+    }
+
     @Builder
     public Diary(DiaryGroup diaryGroup, User user, String title, String content, FeelingType feelingType, boolean isTemp, String diaryDate) {
         this.diaryGroup = diaryGroup;
@@ -56,11 +61,13 @@ public class Diary extends BaseTimeEntity {    // 일기
         this.content = content;
         this.diaryDate = diaryDate;
         this.feelingType = feelingType;
+        this.isTemp = isTemp;
     }
 
-    public void updateDiary(String title, String content, FeelingType feelingType) {
+    public void updateDiary(String title, String content, String diaryDate, FeelingType feelingType) {
         this.title = title;
         this.content = content;
+        this.diaryDate = diaryDate;
         this.feelingType = feelingType;
     }
 }

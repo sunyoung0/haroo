@@ -1,9 +1,6 @@
 package com.sun.back.service;
 
-import com.sun.back.dto.diary.CreateDiaryRequest;
-import com.sun.back.dto.diary.GetDiaryDetailResponse;
-import com.sun.back.dto.diary.GetDiaryListResponse;
-import com.sun.back.dto.diary.PatchDiaryRequest;
+import com.sun.back.dto.diary.*;
 import com.sun.back.entity.User;
 import com.sun.back.entity.diary.Diary;
 import com.sun.back.entity.diary.DiaryGroup;
@@ -44,11 +41,22 @@ public class DiaryService {
         // 권한 체크 : 유저가 해당 그룹의 멤버인지 확인
         boolean isMember = diaryMemberRepository.existsByUserAndDiaryGroup_Id(user, groupId);
 
-        if(!isMember) {
+        if (!isMember) {
             throw new DiaryAccessException("해당 다이어리에 글을 쓸 권한이 없습니다.");
         }
 
-        // 일기 저장
+        // 만약 diaryId가 있는 경우 (임시 저장된 글이 있는 경우)
+        if (dto.diaryId() != null) {
+            Diary existingDiary = diaryRepository.findById(dto.diaryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("일기를 찾을 수 없습니다."));
+
+            // 내용 업데이트 및 임시 저장 해제
+            existingDiary.updateDiary(dto.title(), dto.content(), dto.diaryDate(), dto.feelingType());
+            existingDiary.publish();    // isTemp = false로 변경
+            return "일기 작성 완료";
+        }
+
+        // 임시 저장된 글이 없을 경우
         Diary diary = Diary.builder()
                 .diaryGroup(group)
                 .user(user)
@@ -56,11 +64,45 @@ public class DiaryService {
                 .content(dto.content())
                 .diaryDate(dto.diaryDate())
                 .feelingType(dto.feelingType())
+                .isTemp(false)  // 정식 등록
                 .build();
 
         diaryRepository.save(diary);
 
         return "일기 작성이 완료되었습니다.";
+    }
+
+    // 일기 임시 저장 기능
+    @Transactional
+    public Long tempSaveDiary(String email, DiaryTempRequest dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+        // diaryId가 넘어왔다면 기존 임시 저장 건을 수정
+        if (dto.diaryId() != null) {
+            Diary diary = diaryRepository.findById(dto.diaryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("일기를 찾을 수 없습니다."));
+            // 작성자 본인 확인
+            if (!diary.getUser().equals(user)) throw new DiaryAccessException("권한이 없습니다.");
+
+            diary.updateDiary(dto.title(), dto.content(), dto.diaryDate(), dto.feelingType());
+
+            return diary.getId();
+        }
+
+        // diaryId가 없다면 새로 생성 (isTemp = True)
+        DiaryGroup group = diaryGroupRepository.findById(dto.groupId())
+                .orElseThrow(() -> new ResourceNotFoundException("그룹을 찾을 수 없습니다."));
+        Diary newTempDiary = Diary.builder()
+                .diaryGroup(group)
+                .user(user)
+                .title(dto.title() != null ? dto.title() : "제목 없음")
+                .content(dto.content() != null ? dto.content() : "내용 없음")
+                .diaryDate(dto.diaryDate() != null ? dto.diaryDate() : " ")
+                .feelingType(dto.feelingType())
+                .isTemp(true)
+                .build();
+
+        return diaryRepository.save(newTempDiary).getId();
     }
 
     // 해당 그룹에서 일기 리스트 조회
@@ -71,7 +113,7 @@ public class DiaryService {
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 권한 체크
-        if(!diaryMemberRepository.existsByUserAndDiaryGroup_Id(user,groupId)) {
+        if (!diaryMemberRepository.existsByUserAndDiaryGroup_Id(user, groupId)) {
             throw new DiaryAccessException("해당 다이어리를 볼 권한이 없습니다.");
         }
 
@@ -148,7 +190,7 @@ public class DiaryService {
         }
 
         // 엔티티 업데이트
-        diary.updateDiary(dto.title(), dto.content(), dto.feelingType());
+        diary.updateDiary(dto.title(), dto.content(), dto.diaryDate(), dto.feelingType());
     }
 
     // 일기 삭제

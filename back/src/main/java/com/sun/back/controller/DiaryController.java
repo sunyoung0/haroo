@@ -1,13 +1,12 @@
 package com.sun.back.controller;
 
-import com.sun.back.dto.diary.CreateDiaryRequest;
-import com.sun.back.dto.diary.GetDiaryDetailResponse;
-import com.sun.back.dto.diary.GetDiaryListResponse;
-import com.sun.back.dto.diary.PatchDiaryRequest;
+import com.sun.back.dto.diary.*;
+import com.sun.back.entity.diary.Diary;
 import com.sun.back.service.DiaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,6 +22,12 @@ public class DiaryController {
     @PostMapping("/diaries/{groupId}")
     public ResponseEntity<String> crateDiary(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody CreateDiaryRequest dto) {
         return ResponseEntity.ok(diaryService.createDiary(email, groupId, dto));
+    }
+
+    // 일기 임시 저장
+    @PostMapping("/diaries/temp")
+    public ResponseEntity<Long> tempSave(@AuthenticationPrincipal String email, @RequestBody DiaryTempRequest dto) {
+        return ResponseEntity.ok(diaryService.tempSaveDiary(email, dto));
     }
 
     // 해당 그룹의 일기 리스트 불러오기
