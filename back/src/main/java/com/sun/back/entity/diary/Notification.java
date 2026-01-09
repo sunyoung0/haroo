@@ -30,7 +30,7 @@ public class Notification extends BaseTimeEntity {
 
     private String url;  // 클릭 시 이동할 링크
 
-//    private boolean isRead;     // 읽음 처리 여부
+    private boolean isRead;     // 읽음 처리 여부
 
     @Builder
     public Notification (User user, NotificationType type, String sender, String message, String url) {
@@ -41,8 +41,8 @@ public class Notification extends BaseTimeEntity {
         this.url = url;
     }
 
-//    public void markAsRead() {
-//        this.isRead = true;
-//    }
+    public void markAsRead() {
+        this.isRead = true;
+    }
 
 }

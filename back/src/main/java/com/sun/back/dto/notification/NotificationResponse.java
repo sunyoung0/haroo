@@ -1,9 +1,11 @@
 package com.sun.back.dto.notification;
 
+import com.sun.back.enums.NotificationType;
+
 public record NotificationResponse(
         Long id,
-        String content,
-        String type,
+        String message,
+        NotificationType type,
         String sender,
         String url
 ){}
