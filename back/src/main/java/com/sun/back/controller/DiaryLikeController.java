@@ -1,6 +1,5 @@
 package com.sun.back.controller;
 
-import com.sun.back.repository.DiaryLikeRepository;
 import com.sun.back.service.DiaryLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

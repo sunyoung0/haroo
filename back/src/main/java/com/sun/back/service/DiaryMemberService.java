@@ -7,6 +7,7 @@ import com.sun.back.entity.diary.DiaryGroup;
 import com.sun.back.entity.diary.DiaryMember;
 import com.sun.back.enums.GroupType;
 import com.sun.back.enums.MemberRole;
+import com.sun.back.enums.NotificationType;
 import com.sun.back.exception.DiaryAccessException;
 import com.sun.back.exception.DiaryGroupException;
 import com.sun.back.exception.ResourceNotFoundException;
@@ -26,6 +27,7 @@ public class DiaryMemberService {
     private final UserRepository userRepository;
     private final DiaryMemberRepository diaryMemberRepository;
     private final DiaryGroupRepository diaryGroupRepository;
+    private final NotificationService notificationService;
 
     // 멤버 초대
     @Transactional
@@ -61,6 +63,9 @@ public class DiaryMemberService {
                 .build();
 
         diaryMemberRepository.save(newMember);
+        // 알림 발송
+        notificationService.send(invitee, NotificationType.GROUP_INVITE, owner.getUser().getNickname(), (owner.getUser().getNickname() + "님이 그룹에 초대하셨습니다." ), ("/groups/members/" + groupId));
+
     }
 
     // 해당 그룹의 멤버 리스트 조회

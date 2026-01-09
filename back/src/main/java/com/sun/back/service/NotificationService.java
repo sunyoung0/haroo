@@ -1,0 +1,85 @@
+package com.sun.back.service;
+
+import com.sun.back.dto.notification.NotificationResponse;
+import com.sun.back.entity.User;
+import com.sun.back.entity.diary.Notification;
+import com.sun.back.enums.NotificationType;
+import com.sun.back.exception.ResourceNotFoundException;
+import com.sun.back.repository.EmitterRepository;
+import com.sun.back.repository.NotificationRepository;
+import com.sun.back.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+
+@Service
+@RequiredArgsConstructor
+public class NotificationService {
+
+    private final UserRepository userRepository;
+    private final EmitterRepository emitterRepository;
+    private final NotificationRepository notificationRepository;
+
+    // 1. SSE 연결 설정
+    public SseEmitter subscribe(String email) {
+        SseEmitter emitter = new SseEmitter(60L * 1000 * 60);   // 만료시간 1시간
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+        emitterRepository.save(user.getId(), emitter);
+
+        // 연결 만료 및 에러 발생 시 삭제 처리
+        emitter.onCompletion(() -> emitterRepository.deleteById(user.getId()));
+        emitter.onTimeout(() -> emitterRepository.deleteById(user.getId()));
+
+        // 503 에러 방지를 위한 첫 더미 데이터 전송
+        sendToClient(user.getId(), "Connected! userId = " + user.getId());
+
+        return emitter;
+    }
+
+    // 2 알림 전송 (댓글/좋아요 로직에서 호출)
+    @Transactional
+    public void send(User user, NotificationType type, String sender, String message, String url) {
+        // DB 저장
+        Notification notification = notificationRepository.save(
+                Notification.builder()
+                        .user(user)
+                        .type(type)
+                        .sender(sender)
+                        .message(message)
+                        .url(url)
+                        .build()
+        );
+
+        // 실시간 전송
+        NotificationResponse response = new NotificationResponse(
+                notification.getId(),
+                notification.getMessage(),
+                notification.getType().name(),
+                notification.getSender(),
+                notification.getUrl()
+        );
+
+        sendToClient(user.getId(), response);
+    }
+
+    // 503 에러 방지를 위한 첫 더미 데이터 전송 메서드
+    private void sendToClient (Long userId, Object data) {
+        SseEmitter emitter = emitterRepository.get(userId);
+        if (emitter != null) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .id(String.valueOf(userId))
+                        .name("Notification") // 프론트에서 받을 이벤트 이름
+                        .data(data));
+            } catch (IOException e) {
+                emitterRepository.deleteById(userId);
+            }
+        }
+    }
+
+}

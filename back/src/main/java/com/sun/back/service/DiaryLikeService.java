@@ -3,6 +3,7 @@ package com.sun.back.service;
 import com.sun.back.entity.User;
 import com.sun.back.entity.diary.Diary;
 import com.sun.back.entity.diary.DiaryLike;
+import com.sun.back.enums.NotificationType;
 import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryLikeRepository;
 import com.sun.back.repository.DiaryRepository;
@@ -20,6 +21,7 @@ public class DiaryLikeService {
     private final DiaryLikeRepository diaryLikeRepository;
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public String toggle(String email, Long diaryId) {
@@ -36,6 +38,9 @@ public class DiaryLikeService {
                 })
                 .orElseGet(() -> {
                     diaryLikeRepository.save(new DiaryLike(diary, user));
+                    // 알림 발송
+                    notificationService.send(diary.getUser(), NotificationType.LIKE, user.getNickname(), (user.getNickname() + "님이 내 일기에 좋아요를 남겼습니다." ), ("/diaries/like/" + diaryId));
+
                     return "좋아요 완료";
                 });
     }

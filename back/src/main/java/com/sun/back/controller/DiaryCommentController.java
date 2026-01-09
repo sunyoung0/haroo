@@ -17,14 +17,14 @@ public class DiaryCommentController {
     private final DiaryCommentService diaryCommentService;
 
     // 댓글 작성
-    @PostMapping("/diaries/comment/{diary_id}")
+    @PostMapping("/diaries/comment/{diaryId}")
     public ResponseEntity<Void> createComment(@AuthenticationPrincipal String email, @PathVariable Long diaryId, @RequestBody CreateCommentRequest dto) {
         diaryCommentService.createComment(email, diaryId, dto);
         return ResponseEntity.ok().build();
     }
 
     // 댓글 조회
-    @GetMapping("/diaries/comment/{diary_id}")
+    @GetMapping("/diaries/comment/{diaryId}")
     public ResponseEntity<List<GetCommentResponse>> getComment(@AuthenticationPrincipal String email, @PathVariable Long diaryId) {
         return ResponseEntity.ok(diaryCommentService.getComment(email,diaryId));
     }

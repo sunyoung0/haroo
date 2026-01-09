@@ -5,6 +5,7 @@ import com.sun.back.dto.diaryComment.GetCommentResponse;
 import com.sun.back.entity.User;
 import com.sun.back.entity.diary.Diary;
 import com.sun.back.entity.diary.DiaryComment;
+import com.sun.back.enums.NotificationType;
 import com.sun.back.exception.DiaryAccessException;
 import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryCommentRepository;
@@ -26,6 +27,7 @@ public class DiaryCommentService {
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
     private final DiaryMemberRepository diaryMemberRepository;
+    private final NotificationService notificationService;
 
     // 다이어리 댓글 작성
     @Transactional
@@ -51,6 +53,10 @@ public class DiaryCommentService {
                 .build();
 
         diaryCommentRepository.save(comment);
+
+        // 알림 발송
+        notificationService.send(diary.getUser(), NotificationType.COMMENT, user.getNickname(), (user.getNickname() + "님이 내 일기에 댓글을 남겼습니다." ), ("/diaries/comment/"+diaryId));
+
     }
 
     // 댓글 조회
