@@ -1,11 +1,12 @@
-import { ChangeEvent, useState, useEffect } from "react";
+import { ChangeEvent, useState, useEffect, KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { authService } from "../../api/authService"; // 분리했던 서비스
 import { SignUpRequest } from "../../types/auth"; // 정의했던 타입
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 function SignUp() {
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,17 @@ function SignUp() {
     nickname: "",
   });
 
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSave();
+    }
+  };
+
   // 정규식 설정
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const passwordRegex =
@@ -48,33 +60,32 @@ function SignUp() {
 
   // 입력값 변경 핸들러
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setSignUp((prev) => ({ ...prev, [name]: value }));
+    setSignUp((prev) => ({ ...prev, [event.target.name]: event.target.value }));
 
     // 유효성 검사
-    if (name === "email") {
+    if (event.target.name === "email") {
       setErrors((prev) => ({
         ...prev,
         email:
-          !value || emailRegex.test(value)
+          !event.target.value || emailRegex.test(event.target.value)
             ? ""
             : "올바른 이메일 형식이 아닙니다.",
       }));
     }
-    if (name === "password") {
+    if (event.target.name === "password") {
       setErrors((prev) => ({
         ...prev,
         password:
-          !value || passwordRegex.test(value)
+          !event.target.value || passwordRegex.test(event.target.value)
             ? ""
             : "8자 이상, 영문/숫자/특수문자 포함 필수입니다.",
       }));
     }
-    if (name === "nickname") {
+    if (event.target.name === "nickname") {
       setErrors((prev) => ({
         ...prev,
         nickname:
-          !value || (value.length >= 2 && value.length <= 10)
+          !event.target.value || (event.target.value.length >= 2 && event.target.value.length <= 10)
             ? ""
             : "닉네임은 2~10자 사이여야 합니다.",
       }));
@@ -107,7 +118,7 @@ function SignUp() {
       await authService.signUp(submitData);
 
       alert("회원가입이 완료되었습니다!");
-      navigate("/signin"); // 로그인 페이지로 이동
+      navigate("/auth/login"); // 로그인 페이지로 이동
     } catch (error: unknown) {
       console.error("회원가입 실패:", error);
 
@@ -133,23 +144,51 @@ function SignUp() {
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
+            id="email"
+            name="email"
             type="email"
             placeholder="email@example.com"
             className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
+            onChange={handleChange}
           />
         </div>
       </div>
+
       {/* Password Input */}
       <div>
         <label className="block text-sm text-gray-700 mb-2">Password</label>
         <div className="relative">
+          {/* 왼쪽 자물쇠 아이콘 */}
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
-            type="password"
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
             placeholder="비밀번호를 입력하세요"
-            className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            className={`w-full pl-11 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent ${
+              errors.password ? "border-red-500" : "border-gray-300"
+            }`}
+            onChange={handleChange}
           />
+
+          {/* 오른쪽 눈 모양 토글 버튼 */}
+          <button
+            type="button"
+            onClick={handleTogglePassword}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-sky-600 transition-colors"
+            aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+          >
+            {showPassword ? (
+              <EyeOff className="w-5 h-5" /> // 비밀번호 숨기기 아이콘
+            ) : (
+              <Eye className="w-5 h-5" /> // 비밀번호 보기 아이콘
+            )}
+          </button>
         </div>
+        {/* 에러 메시지 */}
+        {errors.password && (
+          <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+        )}
       </div>
 
       {/* Nickname Input */}
@@ -158,15 +197,20 @@ function SignUp() {
         <div className="relative">
           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
+            id="nickname"
+            name="nickname"
             type="text"
             placeholder="닉네임을 입력하세요"
             className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
           />
         </div>
       </div>
       <button
-        type="submit"
+        type="button"
         className="w-full py-3 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+        onClick={handleSave}
       >
         Sign Up
       </button>
