@@ -1,6 +1,10 @@
 import { Mail, Lock} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import AuthLayOut from "./AuthLayout";
 
 function LoginForm() {
+  const navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: 백엔드 API 호출 로직 (로그인)
@@ -8,7 +12,8 @@ function LoginForm() {
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <AuthLayOut title="나의 다이어리" subtitle="매일의 소중한 순간을 기록하세요">
+    <div className="space-y-4" onSubmit={handleSubmit}>
       {/* Email Input */}
       <div>
         <label className="block text-sm text-gray-700 mb-2">Email</label>
@@ -44,12 +49,14 @@ function LoginForm() {
       <div className="mt-6 text-center">
         <button
           type="button"
+          onClick={() => navigate("/auth/register")}
           className="text-sm text-sky-600 hover:text-sky-700"
         >
           계정이 없으신가요? 회원가입
         </button>
       </div>
-    </form>
+    </div>
+    </AuthLayOut>
   );
 }
 export default LoginForm;
