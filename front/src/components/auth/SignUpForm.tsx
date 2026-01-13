@@ -1,115 +1,39 @@
-import { ChangeEvent, KeyboardEvent, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import AuthLayOut from "./AuthLayout";
 import { useSnackbar } from "../../context/SnackbarContext";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signUpSchema, SignUpFormData } from "../../utils/authValidation";
 
-type SignUp = {
-  email: string;
-  password: string;
-  nickname: string;
-};
 function SignUp() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
-  const [showPassword, setShowPassword] = useState(false); // 비밀번호 보이기 true/false
 
-  const [signUp, setSignUp] = useState<SignUp>({
-    email: "",
-    password: "",
-    nickname: "",
-  });
-
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-    nickname: "",
-  });
+  const [showPassword, setShowPassword] = useState(false); // 비밀번호 보이기
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleSave();
-    }
-  };
+  // react-hook-form 설정
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    mode: "onBlur",
+  });
 
-  // 이메일, 비밀번호 조건 설정
-  // 1. 도메인 끝(TLD)이 최소 2자 이상 (예: .com, .kr, .net)
-  // 2. 숫자로만 된 도메인 끝자리 방지
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$/;
-  const passwordRegex =
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]:;"'<>,.?/\\|-]).{8,}$/;
-
-  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-
-    // 값이 비어있으면 검사하지 않고 리턴 (필수값 체크는 handleSave에서 수행)
-    if (!value) return;
-
-    if (name === "email") {
-      if (!emailRegex.test(value)) {
-        setErrors((prev) => ({
-          ...prev,
-          email: "올바른 이메일 형식이 아닙니다. (예: user@example.com)",
-        }));
-      }
-    }
-
-    if (name === "password") {
-      if (!passwordRegex.test(value)) {
-        setErrors((prev) => ({
-          ...prev,
-          password:
-            "비밀번호는 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.",
-        }));
-      }
-    }
-
-    if (name === "nickname") {
-      if (value.length < 2 || value.length > 10) {
-        setErrors((prev) => ({
-          ...prev,
-          nickname: "닉네임은 2~10자 사이여야 합니다.",
-        }));
-      }
-    }
-  };
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSignUp({ ...signUp, [event.target.name]: event.target.value });
-
-    // 사용자가 타이핑을 시작하면 해당 필드의 빨간 에러 메시지를 즉시 지워줌
-    if (errors[event.target.name as keyof typeof errors]) {
-      setErrors({ ...errors, [event.target.name]: "" });
-    }
-  };
-
-  const handleSave = async () => {
-    // 모든 조건 통과 확인 ( 유효성 검사 )
-    if (errors.email || errors.password || errors.nickname) {
-      showSnackbar("조건이 맞지 않습니다. 다시 확인해주세요.", "warning");
-      return;
-    }
-    if (!signUp.email || !signUp.password || !signUp.nickname) {
-      showSnackbar("모든 필드를 입력해주세요.", "warning");
-      return;
-    }
-
+  // 가입 처리
+  const onSubmit = async (data: SignUpFormData) => {
     try {
-      const userData = {
-        email: signUp.email,
-        password: signUp.password,
-        nickname: signUp.nickname,
-      };
-
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
-        userData
+        data
       );
       showSnackbar("회원가입 성공! 로그인 페이지로 이동합니다.", "success");
       setTimeout(() => navigate("/auth/login"), 1500);
@@ -138,19 +62,15 @@ function SignUp() {
 
   return (
     <AuthLayOut title="회원가입" subtitle="함께 추억을 기록해요">
-      <div className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Email Input */}
         <div>
           <label className="block text-sm text-gray-700 mb-2">Email</label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
-              id="email"
-              name="email"
+              {...register("email")} // register가 name, value, onChange, onBlur를 자동 부여
               type="email"
-              value={signUp.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
               placeholder="email@example.com"
               className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
                 errors.email ? "border-red-500" : "border-gray-300"
@@ -159,7 +79,7 @@ function SignUp() {
           </div>
           {errors.email && (
             <p className="text-[12px] text-red-500 mt-1.5 ml-1 font-medium">
-              {errors.email}
+              {errors.email.message}
             </p>
           )}
         </div>
@@ -171,12 +91,8 @@ function SignUp() {
             {/* 왼쪽 자물쇠 아이콘 */}
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
-              id="password"
-              name="password"
+              {...register("password")}
               type={showPassword ? "text" : "password"}
-              value={signUp.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
               placeholder="비밀번호를 입력하세요"
               className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
                 errors.password ? "border-red-500" : "border-gray-300"
@@ -199,7 +115,7 @@ function SignUp() {
           </div>
           {errors.password && (
             <p className="text-[12px] text-red-500 mt-1.5 ml-1 font-medium">
-              {errors.password}
+              {errors.password.message}
             </p>
           )}
         </div>
@@ -210,13 +126,8 @@ function SignUp() {
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
-              id="nickname"
-              name="nickname"
+              {...register("nickname")}
               type="text"
-              value={signUp.nickname}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
               placeholder="닉네임을 입력하세요"
               className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
                 errors.nickname ? "border-red-500" : "border-gray-300"
@@ -225,13 +136,12 @@ function SignUp() {
           </div>
           {errors.nickname && (
             <p className="text-[12px] text-red-500 mt-1.5 ml-1 font-medium">
-              {errors.nickname}
+              {errors.nickname.message}
             </p>
           )}
         </div>
         <button
-          type="button"
-          onClick={handleSave}
+          type="submit"
           className="w-full py-3 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
         >
           Sign Up
@@ -246,7 +156,7 @@ function SignUp() {
             이미 계정이 있으신가요? 로그인
           </button>
         </div>
-      </div>
+      </form>
     </AuthLayOut>
   );
 }
