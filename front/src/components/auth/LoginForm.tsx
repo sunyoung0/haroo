@@ -1,3 +1,4 @@
+import api from "../../api/axiosInstance";
 import axios from "axios";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,10 +8,13 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormData } from "../../utils/authValidation";
+import { useAuthStore } from "../../store/useAuthStore";
 
 function LoginForm() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+
+  const login = useAuthStore((state) => state.login); // 로그인 액션 가져오기
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -30,10 +34,16 @@ function LoginForm() {
   //, 로그인 처리 함수
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, data);
+      const response = await api.post(`/auth/login`, data);
+
+      // 백엔드 응답에서 토큰 추출 (응답 구조에 따라 수정 필요)
+      const { accessToken, email, nickname } = response.data;
+
+      // Zustand 스토어에 저장 (localStorage에 자동 반영됨)
+      login(accessToken, email, nickname);
+
       showSnackbar("로그인에 성공했습니다.", "success");
       setTimeout(() => navigate("/"), 1500);
-      console.log("Login Success:" + data.email);
     } catch (error) {
       // Axios 에러인지 확인하는 타입 가드
       if (axios.isAxiosError(error)) {
@@ -41,16 +51,13 @@ function LoginForm() {
         const serverMessage =
           error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
         const status = error.response?.status;
-        if (status === 401) {
+        if (status === 401 || status === 400) {
           showSnackbar(serverMessage, "warning");
         } else {
-          // 400 Bad Request: 입력값 형식 오류 등
-          showSnackbar(serverMessage, "warning");
+          // 네트워크 에러나 코드 에러 등 Axios 에러가 아닌 경우
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
         }
-      } else {
-        // 네트워크 에러나 코드 에러 등 Axios 에러가 아닌 경우
-        showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-        console.error("Unknown error:", error);
       }
     }
   };
