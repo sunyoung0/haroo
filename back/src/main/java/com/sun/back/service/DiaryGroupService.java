@@ -27,7 +27,7 @@ public class DiaryGroupService {
 
     // 다이어리 그룹 생성
     @Transactional
-    public Long CreateGroup(String email, GroupCreateRequest dto) {
+    public Long createGroup(String email, GroupCreateRequest dto) {
         // 생성자 유저 찾기
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));

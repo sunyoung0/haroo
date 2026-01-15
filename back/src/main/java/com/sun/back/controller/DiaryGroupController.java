@@ -20,7 +20,7 @@ public class DiaryGroupController {
     // 다이어리 그룹(개인/ 공유) 생성
     @PostMapping("/groups")
     public ResponseEntity<Long> createGroup(@AuthenticationPrincipal String email, @RequestBody GroupCreateRequest dto) {
-        Long groupId = diaryGroupService.CreateGroup(email, dto);
+        Long groupId = diaryGroupService.createGroup(email, dto);
         return ResponseEntity.ok(groupId);
     }
 

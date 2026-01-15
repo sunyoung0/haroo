@@ -44,7 +44,7 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
                 ? "bg-emerald-500"
                 : snackbar.type === "warning"
                 ? "bg-amber-500"
-                : "bg-red-500" // 주황색(amber) 추가
+                : "bg-red-500"
             }`}
           >
             {snackbar.type === "success" && <CheckCircle className="w-5 h-5" />}
@@ -65,6 +65,7 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSnackbar = () => {
   const context = useContext(SnackbarContext);
   if (!context)
