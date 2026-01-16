@@ -1,80 +1,85 @@
-📖 그룹 일기 관리 시스템 (Group Diary System)
-개인적인 기록부터 소중한 사람들과의 공유 기록까지, 한 곳에서 관리하는 스마트 일기 플랫폼 > 실시간 알림과 임시 저장 기능을 통해 끊김 없는 기록 경험을 제공합니다.
+<div align="center">
 
-🛠 Tech Stack
-Backend
-Language: Java 17
+  <h3>📖 그룹 일기 시스템</h3>
+  <p>개인적인 기록부터 소중한 사람들과의 공유 기록까지, 실시간 알람 기능이 결합된 스마트 플랫폼 </p>
 
-Framework: Spring Boot 3.x
+</div>
 
-Database: MySQL, Spring Data JPA
+<br />
 
-Query Optimization: QueryDSL
+## 📋 프로젝트 개요
+- **프로젝트명**: 그룹 일기 관리 시스템 (Group Diary System)
+- **핵심 가치**: 실시간 연결성, 작성의 편의성, 직관적인 관리
+- **개발 배경**: 기존 공유 다이어리 서비스들의 불편한 시각화와 실시간 소통의 부재를 해결하고자 **"기록하는 즐거움과 보는 즐거움"**을 동시에 제공하는 통합 플랫폼을 기획하게 되었습니다.
 
-Real-time: SSE (Server-Sent Events)
+---
 
-Frontend
-Framework: React, TypeScript
+## 🚀 Key Features
 
-Styling: Tailwind CSS, Lucide-react (Icons)
+<table width="100%">
+  <tr>
+    <td width="50%">
+      <h3>1. 스마트 일기 작성 (Upsert)</h3>
+      <ul>
+        <li><b>자동 저장 및 복구</b>: 작성 중 유실 방지</li>
+        <li><b>isTemp 필드</b>: 임시 저장 상태 관리</li>
+        <li><b>Debouncing</b>: 서버 부하 최적화</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>2. 실시간 알림 (SSE)</h3>
+      <ul>
+        <li><b>실시간 푸시</b>: 댓글, 좋아요, 초대 알림</li>
+        <li><b>미열람 알림 복구</b>: 구독 시 즉시 전송</li>
+        <li><b>자동 스케줄링</b>: 30일 경과 알림 자동 삭제</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>3. 대시보드 관리</h3>
+      <ul>
+        <li><b>유형별 구분</b>: Personal / Shared 그룹화</li>
+        <li><b>테마 차별화</b>: Enum 기반 컬러 매칭</li>
+        <li><b>반응형 그리드</b>: 모든 기기 최적화</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>4. 데이터 최적화</h3>
+      <ul>
+        <li><b>QueryDSL</b>: 타입 안정적 동적 쿼리</li>
+        <li><b>Dirty Checking</b>: 효율적인 상태 업데이트</li>
+        <li><b>API 모듈화</b>: Axios Interceptor 활용</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
-State Management: Zustand
+---
 
-Animation: Framer Motion style animations
+## 🏗 System Architecture
 
-🏗 System Architecture & Domain Model
-프로젝트는 확장성과 유지보수를 고려하여 다음과 같은 핵심 도메인 모델을 기반으로 설계되었습니다.
+<br />
+프로젝트는 확장성과 유지보수를 위해 **도메인 중심 설계(Domain-Driven Design)** 개념을 도입하여 각 엔티티 간의 권한과 역할을 명확히 구분했습니다.
 
-User: 사용자 인증 및 기본 정보 관리
+---
 
-DiaryGroup: 일기장의 성격 정의 (PERSONAL / SHARED)
+## 🛠 Tech Stack
 
-DiaryMember: 그룹별 멤버십 및 권한(OWNER, MEMBER) 제어
+### 💻 Backend
+<p>
+  <img src="https://img.shields.io/badge/Java_17-007396?style=for-the-badge&logo=java&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring_Boot_3.x-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=hibernate&logoColor=white" />
+  <img src="https://img.shields.io/badge/QueryDSL-073159?style=for-the-badge&logo=java&logoColor=white" />
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+</p>
 
-Diary: 일기 본문 저장 및 임시 저장(isTemp) 상태 관리
-
-Notification: 이벤트 기반 실시간 알림 및 이력 관리
-
-🚀 Key Features
-1. 다이어리 그룹 관리 (Dashboard)
-사용자의 용도에 맞는 다이어리 환경을 제공합니다.
-
-유형별 생성: 개인 전용(PERSONAL)과 공동 작성용(SHARED) 그룹 구분 생성.
-
-직관적 UI: Enum 타입에 따른 테마 차별화 (개인용: Sky/Book, 그룹용: Indigo/Users).
-
-반응형 그리드: 다양한 디바이스 환경에 최적화된 대시보드 레이아웃.
-
-2. 스마트 일기 작성 (Upsert & Auto-save)
-데이터 유실을 방지하고 사용자 편의성을 극대화했습니다.
-
-통합 API: diaryId 유무에 따라 INSERT와 UPDATE를 자동으로 전환하는 Upsert 로직.
-
-최적화: 프론트엔드 디바운싱(Debouncing) 기술을 적용하여 서버 부하 감소.
-
-임시 저장: isTemp 필드를 활용해 작성 중인 내용을 보관하고, 최종 [등록] 시에만 목록에 노출.
-
-3. 실시간 알림 시스템 (SSE 기반)
-사용자 간의 인터랙션을 실시간으로 전달합니다.
-
-SseEmitter 활용: 서버-클라이언트 간 단방향 실시간 통신 구현.
-
-알림 복구: 구독 시점에 읽지 않은(isRead=false) 알림을 즉시 전송하여 데이터 유실 방지.
-
-이벤트 트리거: 댓글, 좋아요, 그룹 초대 등 주요 액션 발생 시 실시간 푸시.
-
-4. 데이터 관리 및 자동화
-Dirty Checking: 알림 클릭 시 별도의 쿼리 없이 상태를 읽음(isRead=true)으로 변경.
-
-자동 스케줄링: @Scheduled를 활용하여 매일 새벽 3시, 30일이 지난 알림 데이터를 자동 삭제하는 최적화 로직 적용.
-
-💻 Technical Deep Dive
-Efficient Data Handling
-QueryDSL: 복잡한 동적 쿼리를 타입 안정성을 보장하며 구현했습니다.
-
-SSE Connection: 유저별 전용 스트림 연결을 통해 HTTP 오버헤드를 줄인 실시간 통신을 구현했습니다.
-
-UI/UX Details
-Headless UI: 모달 및 오버레이 컴포넌트의 접근성과 커스텀 자유도를 높였습니다.
-
-Axios Interceptor: 공통 헤더 및 베이스 URL 관리를 통해 API 통신 로직을 모듈화했습니다.
+### 🎨 Frontend
+<p>
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/Zustand-443E38?style=for-the-badge&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white" />
+</p>
