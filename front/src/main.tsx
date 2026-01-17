@@ -9,6 +9,7 @@ import MainPage from "./pages/MainPage";
 import { SnackbarProvider } from "./context/SnackbarContext";
 import { useAuthStore } from "./store/useAuthStore";
 import { Navigate } from "react-router-dom";
+import DiaryGroupPage from "./pages/DiaryGroupPage";
 
 // 루트  경로에서 로그인 여부를 판단하여 페이지 선택해줌
 // eslint-disable-next-line react-refresh/only-export-components
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
   {
     path: "/auth/register",
     element: <SignUp />,
+  },
+  {
+    path: "/diaries/:groupId",
+    element: <DiaryGroupPage />,
   },
   // 잘못된 경로 접근 시 홈으로 리다이렉트
   {

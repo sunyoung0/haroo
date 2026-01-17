@@ -32,7 +32,7 @@ public class DiaryController {
 
     // 해당 그룹의 일기 리스트 불러오기
     @GetMapping("/diaries/{groupId}")
-    public ResponseEntity<List<GetDiaryListResponse>> getDiaries(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestParam(required = false) LocalDate diaryDate, @RequestParam(required = false) Long userId) {
+    public ResponseEntity<GroupDiaryResponse> getDiaries(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestParam(required = false) LocalDate diaryDate, @RequestParam(required = false) Long userId) {
         return ResponseEntity.ok(diaryService.getGroupDiaries(email, groupId, diaryDate, userId));
     }
 

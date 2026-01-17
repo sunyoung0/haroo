@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 public record GetDiaryListResponse(
         Long id,
-        String notice,
         String title,
         String nickname,
         FeelingType feelingType,

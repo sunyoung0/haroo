@@ -56,7 +56,7 @@ public class UserService {
         String accessToken = jwtService.getToken(user.getEmail(), user.getId());
 
         // 응답 DTO 생성 및 반환
-        return new LoginResponse(accessToken, "Bearer", user.getEmail(), user.getId());
+        return new LoginResponse(accessToken, "Bearer", user.getEmail(), user.getId(), user.getNickname());
     }
 
     // 유저 정보 조회
