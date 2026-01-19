@@ -1,21 +1,13 @@
 import { Plus, LogOut, User, Calendar, Trash2 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
-import CreateDiaryModal from "../components/diaryGroup/CreateDiaryModal";
+import CreateDiaryModal from "../components/modals/CreateDiaryModal";
 import { useEffect, useState } from "react";
 import api from "../api/axiosInstance";
 import { UsersIcon, Book } from "lucide-react";
 import { useSnackbar } from "../context/SnackbarContext";
 import axios from "axios";
-
-type DiaryGroup = {
-  id: number;
-  title: string;
-  type: "PERSONAL" | "SHARED";
-  createdAt: string;
-  membersCount: number;
-  role: "OWNER" | "MEMBER";
-};
+import { DiaryGroup } from "../types/types";
 
 const MainPage = () => {
   const navigate = useNavigate();

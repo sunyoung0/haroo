@@ -1,36 +1,44 @@
-import {
-  ArrowLeft,
-  Settings,
-  MoreVertical,
-  Pin,
-  Heart,
-  MessageCircle,
-} from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/axiosInstance";
+import { Pin } from "lucide-react";
+import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useSnackbar } from "../context/SnackbarContext";
+import { useAuthStore } from "../store/useAuthStore";
+import api from "../api/axiosInstance";
+import axios from "axios";
 
-type diaryGroupList = {
-  id: number;
-  notice: string;
-  title: string;
-  nickname: string;
-  feelingType: string;
-  createdAt: string;
-  commentCount: number;
-  likeCount: number;
-};
+import GroupHeader from "../components/diaryGroup/GroupHeader";
+import GroupTabs from "../components/diaryGroup/GroupTabs";
+import DiaryCard from "../components/diaryGroup/DiaryCard";
+import CalendarView from "../components/diaryGroup/CalendarView";
+import MemberListView from "../components/diaryGroup/MemberListView";
+import InviteMemberModal from "../components/modals/MemberInviteModal";
+import EditNoticeModal from "../components/modals/EditNoticeModal";
+
+import { diaryGroupList } from "../types/types";
+import { MemberList } from "../types/types";
 
 const DiaryGroupPage = () => {
-  const navigate = useNavigate();
   const { groupId } = useParams();
+  const { userEmail } = useAuthStore(); // Zustand에서 로그인 유저 정보 가져오기
+  const { showSnackbar } = useSnackbar();
+
+  // 상태 관리
+  const [activeTab, setActiveTab] = useState("feed"); // feed, calendar, members
   const [diariesList, setDiariesList] = useState<diaryGroupList[]>([]);
   const [groupInfo, setGroupInfo] = useState({ title: "", notice: "" });
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+  const [newNotice, setNewNotice] = useState(""); // 수정할 공지 내용
+  const [members, setMembers] = useState<MemberList[]>([]);
+
+  // 내가 방장인지 확인
+  const isOwner = members.find((m) => m.userEmail === userEmail)?.role === "OWNER";
 
   const getDiaries = async () => {
     try {
       const response = await api.get(`/diaries/${groupId}`);
-      setDiariesList(response.data.diaries);
+      setDiariesList(response.data.diaries || []);
       setGroupInfo({
         title: response.data.groupTitle,
         notice: response.data.groupNotice,
@@ -40,30 +48,63 @@ const DiaryGroupPage = () => {
     }
   };
 
+  const handleUpdateNotice = async () => {
+    try {
+      await api.put(`/groups/${groupId}`, {
+        notice: newNotice,
+      });
+
+      setGroupInfo((prev) => ({ ...prev, notice: newNotice }));
+      setIsNoticeModalOpen(false);
+      showSnackbar("공지사항이 수정되었습니다.", "success");
+    } catch (error) {
+      console.error("공지사항 수정 실패:", error);
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message ||
+          "공지사항 수정 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 400) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
+    }
+  };
+
+  const fetchMembers = async () => {
+    try {
+      const response = await api.get(`/groups/members/${groupId}`);
+      setMembers(response.data);
+    } catch (error) {
+      showSnackbar("멤버 목록을 불러오지 못했습니다.", "error");
+    }
+  };
+
   useEffect(() => {
-    getDiaries();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (groupId) {
+      getDiaries();
+      fetchMembers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center">
       <div className="w-full max-w-2xl bg-white shadow-sm flex flex-col">
-        {/* 상단 헤더 */}
-        <header className="flex items-center justify-between p-4 border-b bg-white sticky top-0 z-10">
-          <button
-            onClick={() => navigate("/")}
-            className="p-1 text-gray-600 hover:bg-slate-100 rounded-full transition-colors"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <h1 className="text-lg font-bold text-gray-800">{groupInfo.title}</h1>
-          <button className="p-1 text-gray-600 hover:bg-slate-100 rounded-full transition-colors">
-            <Settings size={24} />
-          </button>
-        </header>
+        <GroupHeader
+          title={groupInfo.title}
+          onEditNotice={() => {
+            setNewNotice(groupInfo.notice); // 기존 공지 세팅
+            setIsNoticeModalOpen(true); // 모달 열기
+          }}
+          onInvite={() => setIsInviteModalOpen(true)}
+        />
 
-        {/* 서브 헤더 (공지사항/설명 영역) */}
-        <div className="p-4 bg-white">
+        {/* 공지사항 */}
+        <div className="p-4 bg-white pb-2">
           <div className="w-full py-3 px-4 rounded-2xl border border-purple-100 bg-purple-50/50 flex items-center justify-center gap-2 text-purple-600 font-semibold shadow-sm">
             <Pin size={18} className="shrink-0" />
             <span className="truncate">
@@ -72,64 +113,55 @@ const DiaryGroupPage = () => {
           </div>
         </div>
 
-        {/* 상세 콘텐츠 영역 */}
+        {/* 탭 메뉴 */}
+        <GroupTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+        {/* 메인 콘텐츠 영역 */}
         <main className="flex-1 p-6 overflow-y-auto bg-slate-50/50 space-y-6">
-          {diariesList.length > 0 ? (
-            diariesList.map((diary) => (
-              <div
-                key={diary.id}
-                className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden transition-all hover:shadow-md"
-              >
-                <div className="p-8">
-                  <div className="flex justify-between items-start">
-                    <h2 className="text-2xl font-black text-slate-900 leading-tight">
-                      {diary.title}
-                    </h2>
-                    <button className="text-slate-300 hover:text-slate-600 transition-colors">
-                      <MoreVertical size={20} />
-                    </button>
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-bold">
-                      # {diary.feelingType}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-50">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-slate-700">
-                        {diary.nickname}
-                      </span>
-                      <span className="text-sm font-medium text-slate-400">
-                        {diary.createdAt?.substring(0, 10)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <Heart size={18} />
-                        <span className="text-sm font-semibold">
-                          {diary.likeCount}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <MessageCircle size={18} />
-                        <span className="text-sm font-semibold">
-                          {diary.commentCount}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+          {activeTab === "feed" && (
+            <>
+              {diariesList.length > 0 ? (
+                diariesList.map((diary) => (
+                  <DiaryCard key={diary.id} diary={diary} />
+                ))
+              ) : (
+                <div className="text-center py-20 text-slate-400 font-medium bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+                  아직 작성된 일기가 없습니다.
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-20 text-slate-400 font-medium">
-              아직 작성된 일기가 없습니다.
-            </div>
+              )}
+            </>
           )}
+
+          {activeTab === "calendar" && <CalendarView diaries={diariesList} />}
+
+          {activeTab === "members" && (
+            <MemberListView
+              members={members}
+              onInvite={() => setIsInviteModalOpen(true)}
+              isOwner={isOwner} // 내가 방장인지 여부 전달
+              currentUserEmail={userEmail}
+            />
+          )}
+
           <div className="h-10" />
         </main>
+
+        {/* 멤버 초대 모달 */}
+        <InviteMemberModal
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          inviteEmail={inviteEmail}
+          setInviteEmail={setInviteEmail}
+          onSendInvite={handleUpdateNotice}
+        />
+        {/* 공지사항 수정 모달 */}
+        <EditNoticeModal
+          isOpen={isNoticeModalOpen}
+          onClose={() => setIsNoticeModalOpen(false)}
+          notice={newNotice}
+          setNotice={setNewNotice}
+          onUpdate={handleUpdateNotice}
+        />
       </div>
     </div>
   );

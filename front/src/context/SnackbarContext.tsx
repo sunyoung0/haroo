@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { CheckCircle, AlertCircle, X, XCircle } from "lucide-react";
+import { SnackbarType } from "../types/types";
 
-type SnackbarType = "success" | "error" | "warning";
 
 interface SnackbarContextType {
   showSnackbar: (message: string, type?: SnackbarType) => void;

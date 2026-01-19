@@ -14,6 +14,7 @@
     "axios": "^1.13.2",
     "lucide-react": "^0.555.0",
     "react": "^18.2.0",
+    "react-calendar": "^6.0.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.71.0",
     "react-router-dom": "^7.12.0",

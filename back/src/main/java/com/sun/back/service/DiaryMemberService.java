@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -82,7 +83,9 @@ public class DiaryMemberService {
         return members.stream()
                 .map(m -> new GroupMemberListResponse(
                         m.getUser().getId(),
+                        m.getUser().getEmail(),
                         m.getUser().getNickname(),
+                        m.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy. MM. dd")),
                         m.getRole()
                 )).toList();
     }

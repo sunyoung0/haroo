@@ -31,7 +31,7 @@ public class DiaryGroupController {
     }
 
     // 다이어리 공지 수정
-    @PutMapping("/groups/{group_id}")
+    @PutMapping("/groups/{groupId}")
     public ResponseEntity<Void> updateNotice(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody NoticeUpdateRequest dto) {
         diaryGroupService.updateNotice(email, groupId, dto.notice());
         return ResponseEntity.ok().build();
