@@ -24,7 +24,7 @@ const GroupTabs = ({ activeTab, setActiveTab }: GroupTabsProps) => {
             <span
               className={`text-sm font-bold transition-colors flex items-center gap-1.5 ${
                 activeTab === tab.id
-                  ? "text-purple-600"
+                  ? "text-sky-600"
                   : "text-slate-400 group-hover:text-slate-600"
               }`}
             >
@@ -33,7 +33,7 @@ const GroupTabs = ({ activeTab, setActiveTab }: GroupTabsProps) => {
             </span>
             {/* 활성화 표시 바 (Underline) */}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-600 rounded-full" />
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-sky-600 rounded-full" />
             )}
           </button>
         ))}

@@ -89,4 +89,27 @@ public class DiaryMemberService {
                         m.getRole()
                 )).toList();
     }
+
+    // 멤버 탈퇴 기능
+    @Transactional
+    public void outMember(Long groupId, String adminEmail, String targetEmail) {
+        // 방장 권한 확인
+        DiaryMember admin = diaryMemberRepository.findByUser_EmailAndDiaryGroup_Id(adminEmail, groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("그룹 멤버가 아닙니다."));
+
+        if (!admin.getRole().equals(MemberRole.OWNER)) {
+            throw new DiaryAccessException("방장만 멤버를 강퇴할 수 있습니다.");
+        }
+
+        // 2. 자신을 강퇴하는지 확인
+        if (adminEmail.equals(targetEmail)) {
+            throw new DiaryGroupException("본인은 강퇴할 수 없습니다.");
+        }
+
+        // 3. 대상 삭제
+        DiaryMember target = diaryMemberRepository.findByUser_EmailAndDiaryGroup_Id(targetEmail, groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 멤버를 찾을 수 없습니다."));
+
+        diaryMemberRepository.delete(target);
+    }
 }

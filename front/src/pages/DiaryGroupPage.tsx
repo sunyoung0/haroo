@@ -1,5 +1,5 @@
 import { Pin } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSnackbar } from "../context/SnackbarContext";
 import { useAuthStore } from "../store/useAuthStore";
@@ -21,6 +21,7 @@ const DiaryGroupPage = () => {
   const { groupId } = useParams();
   const { userEmail } = useAuthStore(); // Zustand에서 로그인 유저 정보 가져오기
   const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   // 상태 관리
   const [activeTab, setActiveTab] = useState("feed"); // feed, calendar, members
@@ -33,7 +34,8 @@ const DiaryGroupPage = () => {
   const [members, setMembers] = useState<MemberList[]>([]);
 
   // 내가 방장인지 확인
-  const isOwner = members.find((m) => m.userEmail === userEmail)?.role === "OWNER";
+  const isOwner =
+    members.find((m) => m.userEmail === userEmail)?.role === "OWNER";
 
   const getDiaries = async () => {
     try {
@@ -45,6 +47,20 @@ const DiaryGroupPage = () => {
       });
     } catch (error) {
       console.log("에러 발생 : ", error);
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message ||
+          "다이어리를 불러오는 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 404) {
+          showSnackbar(serverMessage, "warning");
+        } else if (status === 403) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
     }
   };
 
@@ -53,7 +69,6 @@ const DiaryGroupPage = () => {
       await api.put(`/groups/${groupId}`, {
         notice: newNotice,
       });
-
       setGroupInfo((prev) => ({ ...prev, notice: newNotice }));
       setIsNoticeModalOpen(false);
       showSnackbar("공지사항이 수정되었습니다.", "success");
@@ -79,7 +94,112 @@ const DiaryGroupPage = () => {
       const response = await api.get(`/groups/members/${groupId}`);
       setMembers(response.data);
     } catch (error) {
-      showSnackbar("멤버 목록을 불러오지 못했습니다.", "error");
+      console.error("멤버 리스트를 불러오는 중 오류 발생 :", error);
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message ||
+          "멤버 리스트를 불러오는 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 400) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
+    }
+  };
+
+  const handleMemberInvite = async () => {
+    try {
+      await api.post(`/groups/members/${groupId}`, { email: inviteEmail });
+      showSnackbar("멤버를 성공적으로 초대했습니다!", "success");
+      setInviteEmail("");
+      setIsInviteModalOpen(false);
+      fetchMembers();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message ||
+          "멤버를 초대하는 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 400) {
+          showSnackbar(serverMessage, "warning");
+        } else if (status === 403) {
+          showSnackbar(serverMessage, "warning");
+        } else if (status === 404) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
+    }
+  };
+
+  const handleDeleteOrLeave = async () => {
+    const message = isOwner
+      ? "다이어리 그룹 전체를 삭제하시겠습니까?"
+      : "이 그룹에서 탈퇴하시겠습니까?";
+
+    if (!window.confirm(message)) return;
+
+    try {
+      if (isOwner) {
+        // 방장인 경우
+        await api.delete(`/groups/${groupId}`);
+        showSnackbar("그룹이 삭제되었습니다.", "success");
+      } else {
+        // 멤버인 경우
+        await api.delete(`/groups/leave/${groupId}`);
+        showSnackbar("그룹에서 탈퇴했습니다.", "success");
+      }
+      navigate("/");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message ||
+          "다이어리 삭제/탈퇴 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 400) {
+          showSnackbar(serverMessage, "warning");
+        } else if (status === 403) {
+          showSnackbar(serverMessage, "warning");
+        } else if (status === 404) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
+    }
+  };
+
+  const handleOutMember = async (targetEmail: string) => {
+    if (!window.confirm(`${targetEmail}님을 그룹에서 강퇴하시겠습니까?`))
+      return;
+
+    try {
+      await api.delete(
+        `/groups/members/out/${groupId}?targetEmail=${targetEmail}`,
+      );
+      showSnackbar("멤버를 강퇴했습니다.", "success");
+      fetchMembers(); // 목록 새로고침
+    } catch (error) {
+      showSnackbar("강퇴 처리에 실패했습니다.", "error");
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message || "멤버 강퇴 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 400) {
+          showSnackbar(serverMessage, "warning");
+        } else if (status === 404) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
     }
   };
 
@@ -96,16 +216,17 @@ const DiaryGroupPage = () => {
       <div className="w-full max-w-2xl bg-white shadow-sm flex flex-col">
         <GroupHeader
           title={groupInfo.title}
+          isOwner={isOwner}
           onEditNotice={() => {
             setNewNotice(groupInfo.notice); // 기존 공지 세팅
             setIsNoticeModalOpen(true); // 모달 열기
           }}
-          onInvite={() => setIsInviteModalOpen(true)}
+          onDeleteOrLeave={handleDeleteOrLeave}
         />
 
         {/* 공지사항 */}
         <div className="p-4 bg-white pb-2">
-          <div className="w-full py-3 px-4 rounded-2xl border border-purple-100 bg-purple-50/50 flex items-center justify-center gap-2 text-purple-600 font-semibold shadow-sm">
+          <div className="w-full py-3 px-4 rounded-2xl border border-sky-100 bg-sky-50/50 flex items-center justify-center gap-2 text-sky-600 font-semibold shadow-sm">
             <Pin size={18} className="shrink-0" />
             <span className="truncate">
               {groupInfo.notice || "공지사항이 없습니다."}
@@ -140,6 +261,7 @@ const DiaryGroupPage = () => {
               onInvite={() => setIsInviteModalOpen(true)}
               isOwner={isOwner} // 내가 방장인지 여부 전달
               currentUserEmail={userEmail}
+              onOut={handleOutMember}
             />
           )}
 
@@ -152,7 +274,7 @@ const DiaryGroupPage = () => {
           onClose={() => setIsInviteModalOpen(false)}
           inviteEmail={inviteEmail}
           setInviteEmail={setInviteEmail}
-          onSendInvite={handleUpdateNotice}
+          onSendInvite={handleMemberInvite}
         />
         {/* 공지사항 수정 모달 */}
         <EditNoticeModal

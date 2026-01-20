@@ -31,7 +31,7 @@ const CalendarView = ({ diaries }: CalendarViewProps) => {
             const hasDiary = diaries.some((d) => isSameDate(date, d.createdAt));
             return hasDiary ? (
               <div className="flex justify-center mt-1">
-                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-sky-500 rounded-full"></div>
               </div>
             ) : null;
           }}

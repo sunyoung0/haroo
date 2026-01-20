@@ -1,14 +1,20 @@
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft, Settings, Trash2, LogOut , Pen} from "lucide-react"; // 아이콘 추가
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface GroupHeaderProps {
   title: string;
   onEditNotice: () => void;
-  onInvite: () => void;
+  onDeleteOrLeave: () => void; // 삭제/탈퇴 함수 추가
+  isOwner: boolean; // 방장 여부 추가
 }
 
-const GroupHeader = ({ title, onEditNotice, onInvite }: GroupHeaderProps) => {
+const GroupHeader = ({
+  title,
+  onEditNotice,
+  onDeleteOrLeave,
+  isOwner,
+}: GroupHeaderProps) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -28,7 +34,7 @@ const GroupHeader = ({ title, onEditNotice, onInvite }: GroupHeaderProps) => {
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className={`p-1 rounded-full transition-colors ${
             isMenuOpen
-              ? "bg-slate-100 text-purple-600"
+              ? "bg-slate-100 text-sky-600"
               : "text-gray-600 hover:bg-slate-100"
           }`}
         >
@@ -49,18 +55,28 @@ const GroupHeader = ({ title, onEditNotice, onInvite }: GroupHeaderProps) => {
                 }}
                 className="w-full px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"
               >
-                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                <Pen size={16} />
                 공지사항 설정
               </button>
+
               <button
                 onClick={() => {
                   setIsMenuOpen(false);
-                  onInvite();
+                  onDeleteOrLeave();
                 }}
-                className="w-full px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                className="w-full px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2"
               >
-                <div className="w-1.5 h-1.5 bg-sky-500 rounded-full" />
-                멤버 초대
+                {isOwner ? (
+                  <>
+                    <Trash2 size={16} />
+                    다이어리 삭제
+                  </>
+                ) : (
+                  <>
+                    <LogOut size={16} />
+                    그룹 탈퇴
+                  </>
+                )}
               </button>
             </div>
           </>

@@ -19,7 +19,7 @@ const DiaryCard = ({ diary }: DiaryCardProps) => {
         </div>
 
         <div className="mt-3 flex gap-2">
-          <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-bold">
+          <span className="px-3 py-1 bg-sky-50 text-sky-600 rounded-full text-xs font-bold">
             # {diary.feelingType}
           </span>
         </div>

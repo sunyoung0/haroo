@@ -6,6 +6,7 @@ import com.sun.back.entity.User;
 import com.sun.back.entity.diary.DiaryGroup;
 import com.sun.back.entity.diary.DiaryMember;
 import com.sun.back.enums.MemberRole;
+import com.sun.back.exception.DiaryAccessException;
 import com.sun.back.exception.DiaryGroupException;
 import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryGroupRepository;
@@ -105,7 +106,7 @@ public class DiaryGroupService {
                 .orElseThrow(() -> new DiaryGroupException("그룹 멤버가 아닙니다."));
 
         if (member.getRole() != MemberRole.OWNER) {
-            throw new DiaryGroupException("방장만 그룹을 삭제할 수 있습니다.");
+            throw new DiaryAccessException("방장만 그룹을 삭제할 수 있습니다.");
         }
 
         // 그룹 삭제 (연관된 일기, 멤버 모두 삭제)

@@ -37,7 +37,7 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
       {/* 스낵바 UI */}
       {snackbar.isVisible && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-bounce-in">
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] animate-bounce-in">
           <div
             className={`flex items-center gap-3 px-6 py-3 rounded-xl shadow-2xl text-white min-w-[300px] transition-all ${
               snackbar.type === "success"

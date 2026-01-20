@@ -1,14 +1,25 @@
-import { Crown, MoreVertical, User } from "lucide-react";
+import { Crown, MoreVertical, User, UserMinus } from "lucide-react";
 import { MemberList } from "../../types/types";
+import { useState } from "react"; // useState 추가
 
 interface MemberListViewProps {
   members: MemberList[];
   isOwner: boolean;
   currentUserEmail?: string | null;
   onInvite: () => void;
+  onOut: (email: string) => void;
 }
 
-const MemberListView = ({ members, isOwner, currentUserEmail, onInvite }: MemberListViewProps) => {
+const MemberListView = ({
+  members,
+  isOwner,
+  currentUserEmail,
+  onInvite,
+  onOut,
+}: MemberListViewProps) => {
+  // 어떤 유저의 메뉴가 열려있는지 관리하는 상태 (이메일 기준)
+  const [openMenuEmail, setOpenMenuEmail] = useState<string | null>(null);
+
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       {/* 요약 헤더 섹션 */}
@@ -18,22 +29,25 @@ const MemberListView = ({ members, isOwner, currentUserEmail, onInvite }: Member
             Total Members
           </span>
           <div className="flex items-baseline gap-0.5">
-            <span className="text-2xl font-black text-purple-600">
+            <span className="text-2xl font-black text-sky-600">
               {members.length}
             </span>
             <span className="text-sm font-bold text-slate-500">명</span>
           </div>
         </div>
-        <button
-          onClick={onInvite}
-          className="px-5 py-2.5 bg-purple-600 text-white text-sm font-bold rounded-2xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-100 active:scale-95"
-        >
-          + 멤버 초대
-        </button>
+
+        {isOwner && (
+          <button
+            onClick={onInvite}
+            className="px-5 py-2.5 bg-sky-600 text-white text-sm font-bold rounded-2xl hover:bg-sky-700 transition-all active:scale-95"
+          >
+            + 멤버 초대
+          </button>
+        )}
       </div>
 
       {/* 멤버 리스트 카드 */}
-      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 ">
         <div className="p-3">
           {members.length === 0 ? (
             <div className="p-16 text-center">
@@ -45,14 +59,14 @@ const MemberListView = ({ members, isOwner, currentUserEmail, onInvite }: Member
             members.map((member) => (
               <div
                 key={member.userId}
-                className="flex items-center justify-between p-4 hover:bg-slate-50/80 transition-all rounded-[2rem] group"
+                className="flex items-center justify-between p-4 hover:bg-slate-50/80 transition-all rounded-[2rem] group relative"
               >
                 {/* 유저 정보 */}
                 <div className="flex items-center gap-4">
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-sm ${
                       member.role === "OWNER"
-                        ? "bg-purple-600 text-white"
+                        ? "bg-sky-600 text-white"
                         : "bg-slate-100 text-slate-500"
                     }`}
                   >
@@ -90,14 +104,48 @@ const MemberListView = ({ members, isOwner, currentUserEmail, onInvite }: Member
                     )}
                   </div>
 
-                  {/* 내가 방장일 때만 나를 제외한 멤버에만 버튼 노출 */}
-                {isOwner && member.userEmail !== currentUserEmail ? (
-                  <button className="p-2 text-slate-300 hover:text-slate-600 hover:bg-white hover:shadow-sm rounded-xl transition-all">
-                    <MoreVertical size={18} />
-                  </button>
-                ) : (
-                  <div className="w-9" />
-                )}
+                  {/* 메뉴 버튼 영역 */}
+                  {isOwner && member.userEmail !== currentUserEmail ? (
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setOpenMenuEmail(
+                            openMenuEmail === member.userEmail
+                              ? null
+                              : member.userEmail,
+                          )
+                        }
+                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+
+                      {/* 메뉴 버튼 - 강퇴 */}
+                      {openMenuEmail === member.userEmail && (
+                        <>
+                          {/* 바깥 클릭 시 닫기 위한 레이어 */}
+                          <div
+                            className="fixed inset-0 z-10"
+                            onClick={() => setOpenMenuEmail(null)}
+                          />
+                          <div className="absolute right-0 mt-2 w-32 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-20 animate-in fade-in zoom-in duration-200 origin-top-right">
+                            <button
+                              onClick={() => {
+                                onOut(member.userEmail);
+                                setOpenMenuEmail(null);
+                              }}
+                              className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 flex items-center gap-2 transition-colors"
+                            >
+                              <UserMinus size={14} />
+                              강퇴하기
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-9" />
+                  )}
                 </div>
               </div>
             ))

@@ -28,4 +28,12 @@ public class DiaryMemberController {
     public ResponseEntity<List<GroupMemberListResponse>> getGroupMemberList(@PathVariable Long groupId) {
         return ResponseEntity.ok(diaryMemberService.getGroupMemberList(groupId));
     }
+
+    // 다이어리 그룹에서 멤버 탈퇴 시키기
+    @DeleteMapping("/groups/members/out/{groupId}")
+    public ResponseEntity<Void> outMember(@PathVariable Long groupId, @RequestParam String targetEmail,@AuthenticationPrincipal String email) {
+        diaryMemberService.outMember(groupId, email, targetEmail);
+        return ResponseEntity.ok().build();
+    }
+
 }
