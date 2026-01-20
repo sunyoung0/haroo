@@ -1,13 +1,18 @@
 import { MoreVertical, Heart, MessageCircle } from "lucide-react";
 import { diaryGroupList } from "../../types/types";
+import { useNavigate } from "react-router-dom";
 
 interface DiaryCardProps {
   diary: diaryGroupList;
 }
 
 const DiaryCard = ({ diary }: DiaryCardProps) => {
+
+  const navigate = useNavigate();
+
   return (
-    <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden transition-all hover:shadow-md">
+    <div onClick={() => navigate(`/diaries/detail/${diary.id}`)}
+    className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden transition-all hover:shadow-md cursor-pointer active:scale-[0.98]">
       <div className="p-8">
         <div className="flex justify-between items-start">
           <h2 className="text-2xl font-black text-slate-900 leading-tight">

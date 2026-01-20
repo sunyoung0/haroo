@@ -40,7 +40,6 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center">
-      {/* 2. 실제 본문 박스: 너비를 최대 2xl(672px)로 제한하고 흰색 배경 설정 */}
       <div className="w-full max-w-2xl bg-white shadow-sm flex flex-col">
         {/* 헤더 영역 */}
         <header className="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center sticky top-0 z-30">
@@ -67,64 +66,45 @@ const MainPage = () => {
             </button>
           </div>
         </header>
-
-        {/* 메인 컨텐츠 영역 */}
-        <main className="max-w-4xl p-8">
-          <div className="flex flex-col gap-8 mb-10">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800 mb-2">
-                  나의 다이어리 목록
-                </h2>
-                <p className="text-slate-500 font-medium">
-                  다이어리를 선택하여 기록을 시작하세요
-                </p>
-              </div>
-
+        {/* 2. 필터 탭 부분: 헤더 바로 밑에 배치 */}
+        <div className="px-4 bg-white border-b border-slate-100 sticky top-[75px] z-20">
+          <div className="flex items-center justify-around">
+            {[
+              { id: "all", label: "전체 목록" },
+              { id: "group", label: "그룹 다이어리" },
+              { id: "private", label: "개인 다이어리" },
+            ].map((tab) => (
               <button
-                onClick={() => setIsModalOpen(true)}
-                className="group relative border-2 border-dashed border-slate-200 rounded-2xl px-8 py-4 flex items-center gap-4 hover:border-sky-400 hover:bg-white transition-all min-h-[80px]"
+                key={tab.id}
+                onClick={() => setFilter(tab.id)}
+                className="relative py-4 px-2 flex items-center gap-2 group"
               >
-                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-sky-50 transition-colors">
-                  <Plus className="w-6 h-6 text-slate-400 group-hover:text-sky-500" />
-                </div>
-                <span className="text-lg font-semibold text-slate-500 group-hover:text-sky-600">
-                  새 다이어리 만들기
-                </span>
-              </button>
-            </div>
-
-            {/* 필터 탭 섹션: 전체 / 그룹 / 개인 */}
-            <div className="flex items-center gap-2 p-1.5 bg-slate-100/50 w-fit rounded-xl border border-slate-200">
-              {[
-                { id: "all", label: "전체 목록" },
-                { id: "group", label: "그룹 다이어리" },
-                { id: "private", label: "개인 다이어리" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setFilter(tab.id)} // filter 상태 변경 함수
-                  className={`
-          px-5 py-2 rounded-lg text-sm font-bold transition-all
-          ${
-            filter === tab.id
-              ? "bg-white text-sky-600 shadow-sm ring-1 ring-slate-200"
-              : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
-          }
-        `}
+                <span
+                  className={`text-sm font-bold transition-colors ${
+                    filter === tab.id
+                      ? "text-sky-600"
+                      : "text-slate-400 group-hover:text-slate-600"
+                  }`}
                 >
                   {tab.label}
-                </button>
-              ))}
-            </div>
+                </span>
+                {filter === tab.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-sky-600 rounded-full" />
+                )}
+              </button>
+            ))}
           </div>
+        </div>
+
+        {/* 메인 컨텐츠 영역 */}
+        <main className="flex-1 p-6 bg-slate-50/30">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* 다이어리 목록 렌더링 */}
             {diaryGroups
               .filter((diary) => {
                 if (filter === "all") return true;
                 if (filter === "group") return diary.type === "SHARED";
-                if (filter === "private") return diary.type === "PERSONAL"; // 또는 상응하는 타입값
+                if (filter === "private") return diary.type === "PERSONAL";
                 return true;
               })
               .map((diary) => (
@@ -186,6 +166,13 @@ const MainPage = () => {
             </div>
           )}
         </main>
+        {/* 플로팅 버튼 */}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="fixed bottom-8 right-[calc(50%-300px)] w-14 h-14 bg-sky-500 text-white rounded-full shadow-lg hover:bg-sky-600 transition-all flex items-center justify-center z-50 hover:scale-110 active:scale-95"
+        >
+          <Plus className="w-8 h-8" />
+        </button>
         <CreateDiaryModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

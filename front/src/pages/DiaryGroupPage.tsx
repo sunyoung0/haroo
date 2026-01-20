@@ -1,4 +1,4 @@
-import { Pin } from "lucide-react";
+import { Pin, Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSnackbar } from "../context/SnackbarContext";
@@ -6,11 +6,11 @@ import { useAuthStore } from "../store/useAuthStore";
 import api from "../api/axiosInstance";
 import axios from "axios";
 
-import GroupHeader from "../components/diaryGroup/GroupHeader";
-import GroupTabs from "../components/diaryGroup/GroupTabs";
-import DiaryCard from "../components/diaryGroup/DiaryCard";
-import CalendarView from "../components/diaryGroup/CalendarView";
-import MemberListView from "../components/diaryGroup/MemberListView";
+import GroupHeader from "../components/diaryGroupPage/GroupHeader";
+import GroupTabs from "../components/diaryGroupPage/GroupTabs";
+import DiaryCard from "../components/diaryGroupPage/DiaryCard";
+import CalendarView from "../components/diaryGroupPage/CalendarView";
+import MemberListView from "../components/diaryGroupPage/MemberListView";
 import InviteMemberModal from "../components/modals/MemberInviteModal";
 import EditNoticeModal from "../components/modals/EditNoticeModal";
 
@@ -284,6 +284,14 @@ const DiaryGroupPage = () => {
           setNotice={setNewNotice}
           onUpdate={handleUpdateNotice}
         />
+        {/* 새 일기 작성 플로팅 버튼*/}
+        <button
+          onClick={() => navigate(`/diaries/write/${groupId}`)} // 작성 페이지 경로로 이동
+          className="fixed bottom-8 right-[calc(50%-300px)] w-14 h-14 bg-sky-500 text-white rounded-full shadow-lg hover:bg-sky-600 transition-all flex items-center justify-center z-50 hover:scale-110 active:scale-95 shadow-sky-200"
+          title="새 일기 작성"
+        >
+          <Plus className="w-8 h-8" />
+        </button>
       </div>
     </div>
   );
