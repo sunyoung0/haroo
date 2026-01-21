@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "axios": "^1.13.2",
+    "event-source-polyfill": "^1.0.31",
     "lucide-react": "^0.555.0",
     "react": "^18.2.0",
     "react-calendar": "^6.0.0",
@@ -22,6 +23,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@types/event-source-polyfill": "^1.0.5",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

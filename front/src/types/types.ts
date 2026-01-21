@@ -28,8 +28,41 @@ export type diaryGroupList = {
   nickname: string;
   feelingType: string;
   createdAt: string;
+  diaryDate: string;
   commentCount: number;
   likeCount: number;
 };
+
+export type GetDiaryDetail = {
+  id: number;
+  title: string;
+  content: string;
+  feelingType: string;
+  createdAt: string;
+  date: string;
+  writerNickname: string;
+  commentCount: number;
+  likeCount: number;
+  isLike: boolean;
+};
+
+export type GetCommentList = {
+  id: number;
+  content: string;
+  nickname: string;
+  createdAt: string;
+  isMine: boolean; // 내가 쓴 댓글인지 확인 (삭제 버튼용)
+};
+
+
+export type Notification = {
+  id: number;
+  message: string;
+  type: 'COMMENT' | 'LIKE' | 'GROUP_INVITE';
+  sender: string;
+  url: string;
+  createdAt:string;
+  isRead: boolean;
+}
 
 export type SnackbarType = "success" | "error" | "warning";

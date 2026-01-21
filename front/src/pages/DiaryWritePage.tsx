@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import api from "../api/axiosInstance";
@@ -42,9 +42,11 @@ const FEELING_TYPES = [
 ];
 
 const DiaryWritePage = () => {
-  const { groupId } = useParams();
+  const { groupId, diaryId } = useParams();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+
+  const isEditMode = Boolean(diaryId); // 수정 인지 확인
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -52,7 +54,6 @@ const DiaryWritePage = () => {
     new Date().toISOString().split("T")[0],
   );
   const [feelingType, setFeelingType] = useState("HAPPY");
-
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
@@ -68,8 +69,15 @@ const DiaryWritePage = () => {
         feelingType,
       };
 
-      await api.post(`/diaries/${groupId}`, diaryDto);
-      showSnackbar("오늘의 기록이 저장되었습니다!", "success");
+      if (isEditMode) {
+        // 수정 요청 (PUT)
+        await api.put(`/diaries/${diaryId}`, diaryDto);
+        showSnackbar("일기가 수정되었습니다!", "success");
+      } else {
+        // 새 작성 요청 (POST)
+        await api.post(`/diaries/${groupId}`, diaryDto);
+        showSnackbar("오늘의 기록이 저장되었습니다!", "success");
+      }
       navigate(-1);
     } catch (error) {
       console.error("저장 실패:", error);
@@ -90,6 +98,26 @@ const DiaryWritePage = () => {
     }
   };
 
+  // 수정 모드일 경우 기존 데이터 불러오기
+  useEffect(() => {
+    if (isEditMode) {
+      const fetchDiaryDetail = async () => {
+        try {
+          const response = await api.get(`/diaries/detail/${diaryId}`);
+          const { title, content, createdAt, feelingType } = response.data;
+          setTitle(title);
+          setContent(content);
+          setDiaryDate(createdAt.slice(0, 10).replace(/\./g, "-"));
+          setFeelingType(feelingType);
+        } catch (error) {
+          showSnackbar("데이터를 불러오지 못했습니다.", "error");
+        }
+      };
+      fetchDiaryDetail();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [diaryId, isEditMode]);
+
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center">
       <div className="w-full max-w-2xl bg-white shadow-sm flex flex-col">
@@ -102,14 +130,16 @@ const DiaryWritePage = () => {
             >
               <ChevronLeft className="w-6 h-6 text-slate-600" />
             </button>
-            <h1 className="text-lg font-bold text-slate-800">일기 작성</h1>
+            <h1 className="text-lg font-bold text-slate-800">
+              {isEditMode ? "일기 수정" : "일기 작성"}
+            </h1>
           </div>
 
           <button
             onClick={handleSave}
             className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-sky-100"
           >
-            저장
+            {isEditMode ? "수정 완료" : "저장"}
           </button>
         </header>
 

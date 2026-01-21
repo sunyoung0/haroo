@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -62,6 +63,10 @@ public class DiaryCommentService {
     // 댓글 조회
     @Transactional(readOnly = true)
     public List<GetCommentResponse> getComment(String email, Long diaryId) {
+        // 현재 로그인한 유저 조회
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+
         // 일기 존재 및 권한 체크
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new ResourceNotFoundException("일기가 존재하지 않습니다."));
@@ -78,7 +83,9 @@ public class DiaryCommentService {
                 .map(c -> new GetCommentResponse(
                         c.getId(),
                         c.getContent(),
-                        c.getUser().getNickname()
+                        c.getUser().getNickname(),
+                        c.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        c.getUser().getId().equals(currentUser.getId())
                 )).toList();
     }
 

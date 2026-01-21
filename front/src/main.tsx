@@ -12,6 +12,7 @@ import { Navigate } from "react-router-dom";
 import DiaryGroupPage from "./pages/DiaryGroupPage";
 import DiaryWritePage from "./pages/DiaryWritePage";
 import DiaryDetailPage from "./pages/DiaryDetailPage";
+import { NotificationProvider } from "./context/NotificationContext";
 
 // 루트  경로에서 로그인 여부를 판단하여 페이지 선택해줌
 // eslint-disable-next-line react-refresh/only-export-components
@@ -30,13 +31,27 @@ const RootRoute = () => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
+const App = () => {
+  const { isLoggedIn, userEmail } = useAuthStore();
+  return (
+    <NotificationProvider userEmail={isLoggedIn ? userEmail : null}>
+      <RouterProvider router={router} />
+    </NotificationProvider>
+  );
+};
+
 // 라우터 설정
 const router = createBrowserRouter([
   {
     path: "/",
     element: <RootRoute />,
     // 에러 발생 시 보여줄 화면 (직접 만든 에러 페이지 컴포넌트 넣어도 됨)
-    errorElement: <div className="p-10">알 수 없는 오류가 발생했습니다. 새로고침 해주세요.</div>,
+    errorElement: (
+      <div className="p-10">
+        알 수 없는 오류가 발생했습니다. 새로고침 해주세요.
+      </div>
+    ),
   },
   {
     path: "/auth/login",
@@ -51,7 +66,13 @@ const router = createBrowserRouter([
     element: <DiaryGroupPage />,
   },
   {
+    // 글 작성
     path: "/diaries/write/:groupId",
+    element: <DiaryWritePage />,
+  },
+  {
+    // 글 수정
+    path: "/diaries/edit/:diaryId",
     element: <DiaryWritePage />,
   },
   {
@@ -68,7 +89,7 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <SnackbarProvider>
-      <RouterProvider router={router} />
+      <App />
     </SnackbarProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

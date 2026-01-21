@@ -1,12 +1,10 @@
 package com.sun.back.controller;
 
 import com.sun.back.dto.diary.*;
-import com.sun.back.entity.diary.Diary;
 import com.sun.back.service.DiaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;

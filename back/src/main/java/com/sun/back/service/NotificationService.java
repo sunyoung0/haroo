@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,9 @@ public class NotificationService {
                     notification.getMessage(),
                     notification.getType(),
                     notification.getSender(),
-                    notification.getUrl()
+                    notification.getUrl(),
+                    notification.getCreatedAt(),
+                    notification.isRead()
             );
 
             // 해당 유저의 emitter로 데이터 전송
@@ -81,7 +84,9 @@ public class NotificationService {
                 notification.getMessage(),
                 notification.getType(),
                 notification.getSender(),
-                notification.getUrl()
+                notification.getUrl(),
+                notification.getCreatedAt(),
+                notification.isRead()
         );
 
         sendToClient(user.getId(), response);
@@ -109,7 +114,7 @@ public class NotificationService {
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
         return notificationRepository.findAllByUser_IdOrderByCreatedAtDesc(user.getId())
                 .stream()
-                .map(n -> new NotificationResponse(n.id(), n.message(), n.type(), n.sender(), n.url()))
+                .map(n -> new NotificationResponse(n.id(), n.message(), n.type(), n.sender(), n.url(), n.createdAt(), n.isRead()))
                 .toList();
     }
 

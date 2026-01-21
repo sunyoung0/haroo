@@ -1,22 +1,18 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, MoreVertical, Calendar, Heart } from "lucide-react";
+import {
+  ChevronLeft,
+  MoreVertical,
+  Calendar,
+  Heart,
+  Pen,
+  Trash,
+} from "lucide-react";
 import { useSnackbar } from "../context/SnackbarContext";
 import api from "../api/axiosInstance";
 import axios from "axios";
-
-type GetDiaryDetail = {
-  id: number;
-  title: string;
-  content: string;
-  feelingType: string;
-  createdAt: string;
-  date: string;
-  writerNickname: string;
-  commentCount: number;
-  likeCount: number;
-  isLike: boolean;
-};
+import { GetDiaryDetail } from "../types/types";
+import CommentSection from "../components/diaryDetailPage/CommentSection";
 
 const DiaryDetailPage = () => {
   const navigate = useNavigate();
@@ -26,7 +22,9 @@ const DiaryDetailPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); // 외부 클릭 감지를 위한 ref
 
-  const [diariesDetail, setDiariesDetail] = useState<GetDiaryDetail | null>(null);
+  const [diariesDetail, setDiariesDetail] = useState<GetDiaryDetail | null>(
+    null,
+  );
 
   const getDiaryDetail = async () => {
     try {
@@ -59,13 +57,56 @@ const DiaryDetailPage = () => {
       showSnackbar("일기가 삭제되었습니다.", "success");
       navigate(-1); // 이전 페이지로 이동
     } catch (error) {
-      showSnackbar("삭제 중 오류가 발생했습니다.", "error");
+      console.log("에러 발생 : ", error);
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message ||
+          "다이어리를 불러오는 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 404) {
+          showSnackbar(serverMessage, "warning");
+        } else if (status === 403) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
     }
   };
 
   // 수정 페이지 이동
   const handleEdit = () => {
-    console.log("수정 추가하기");
+    navigate(`/diaries/edit/${diaryId}`);
+  };
+
+  // 좋아요 버튼 클릭
+  const handleLikeClick = async () => {
+    if (!diariesDetail) return;
+
+    try {
+      await api.post(`/diaries/like/${diaryId}`);
+      setDiariesDetail({
+        ...diariesDetail,
+        isLike: !diariesDetail.isLike,
+        likeCount: diariesDetail.isLike
+          ? diariesDetail.likeCount - 1
+          : diariesDetail.likeCount + 1,
+      });
+    } catch (error) {
+      console.log("에러 발생 : ", error);
+      if (axios.isAxiosError(error)) {
+        const serverMessage =
+          error.response?.data?.message || "좋아요 중 오류가 발생했습니다.";
+        const status = error.response?.status;
+        if (status === 404) {
+          showSnackbar(serverMessage, "warning");
+        } else {
+          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
+          console.error("Unknown error:", error);
+        }
+      }
+    }
   };
 
   // 메뉴 외 영역 클릭 시 닫기 로직
@@ -83,7 +124,7 @@ const DiaryDetailPage = () => {
     if (diaryId) {
       getDiaryDetail();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diaryId]);
 
   return (
@@ -118,15 +159,17 @@ const DiaryDetailPage = () => {
               <div className="absolute right-0 top-12 w-32 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in duration-200">
                 <button
                   onClick={handleEdit}
-                  className="w-full px-4 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="w-full px-4 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3"
                 >
-                  일기 수정
+                  <Pen size={18} className="text-slate-400" />
+                  <span>일기 수정</span>
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="w-full px-4 py-2.5 text-left text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"
+                  className="w-full px-4 py-2.5 text-left text-sm font-bold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"
                 >
-                  일기 삭제
+                  <Trash size={18} className="text-red-400" />
+                  <span>일기 삭제</span>
                 </button>
               </div>
             )}
@@ -150,9 +193,7 @@ const DiaryDetailPage = () => {
               <div className="h-2 w-[1px] bg-slate-200" />
 
               <div className="flex items-center gap-1.5 text-xs font-bold text-sky-600">
-                <span className="text-lg">
-                  {diariesDetail?.feelingType}
-                </span>
+                <span className="text-lg">{diariesDetail?.feelingType}</span>
               </div>
             </div>
           </div>
@@ -163,22 +204,34 @@ const DiaryDetailPage = () => {
               {diariesDetail?.content}
             </div>
 
-            {/* 공감 버튼 */}
+            {/* 좋아요 버튼 */}
             <div className="mt-16 flex justify-center">
-              <button className="flex items-center gap-2 px-6 py-3 rounded-full border border-slate-100 bg-white shadow-sm hover:bg-pink-50 hover:border-pink-100 transition-all group active:scale-95">
+              <button
+                onClick={handleLikeClick}
+                className="flex items-center gap-2 px-6 py-3 rounded-full border border-slate-100 bg-white shadow-sm hover:bg-pink-50 hover:border-pink-100 transition-all group active:scale-95"
+              >
                 <Heart
                   size={20}
-                  className="text-slate-300 group-hover:text-pink-500 group-hover:fill-current"
+                  className={`transition-colors ${
+                    diariesDetail?.isLike
+                      ? "fill-current text-pink-500"
+                      : "text-slate-300 group-hover:text-pink-400"
+                  }`}
                 />
-                <span className="font-bold text-slate-600 group-hover:text-pink-500">
-                  공감 {diariesDetail?.likeCount}
+                <span
+                  className={`font-bold ${diariesDetail?.isLike ? "text-pink-500" : "text-slate-600 group-hover:text-pink-500"}`}
+                >
+                  좋아요 {diariesDetail?.likeCount}
                 </span>
               </button>
             </div>
           </article>
+          <CommentSection
+            diaryId={diaryId}
+            commentCount={diariesDetail?.commentCount ?? 0}
+            onCommentChange={getDiaryDetail} // 댓글 변동 시 일기 정보 다시 불러오기
+          />
         </main>
-
-        {/* 여기에 댓글창 만들기 */}
       </div>
     </div>
   );
