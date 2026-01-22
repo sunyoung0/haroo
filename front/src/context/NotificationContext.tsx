@@ -51,10 +51,24 @@ export const NotificationProvider = ({
 
     const eventSource = new EventSource(`http://localhost:8080/subscribe`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       },
       heartbeatTimeout: 60 * 60 * 1000, // 1시간 (연결 유지 시간)
     });
+
+    eventSource.onmessage = (event) => {
+      try {
+        if (event.data.startsWith("{")) {
+          const newNotification: Notification = JSON.parse(event.data);
+          console.log("새 실시간 알림 : ", newNotification);
+          setNotifications((prev) => [ newNotification, ...prev]);
+        } else {
+          console.log("서버 연결 메시지 : " , event.data);
+        }
+      } catch (error) {
+        console.error("알림 파싱 에러: " + error);
+      }
+    }
 
     eventSource.onopen = () => console.log("SSE 연결 성공!");
     eventSource.onerror = (err) => {

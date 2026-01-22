@@ -98,8 +98,7 @@ public class NotificationService {
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event()
-                        .id(String.valueOf(userId))
-                        .name("Notification") // 프론트에서 받을 이벤트 이름
+                        .id(String.valueOf(System.currentTimeMillis()))
                         .data(data));
             } catch (IOException e) {
                 emitterRepository.deleteById(userId);
