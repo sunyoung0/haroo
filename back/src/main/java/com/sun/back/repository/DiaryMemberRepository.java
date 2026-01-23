@@ -17,6 +17,7 @@ public interface DiaryMemberRepository  extends JpaRepository<DiaryMember, Long>
 
     Optional<DiaryMember> findByUser_EmailAndDiaryGroup_Id(String email, Long groupId);
 
+    @Query("SELECT dm FROM DiaryMember dm JOIN FETCH dm.user WHERE dm.diaryGroup.id = :groupId")
     List<DiaryMember> findAllByDiaryGroup_Id(Long groupId);
 
     boolean existsByUser_EmailAndDiaryGroup_Id(String email, Long id);

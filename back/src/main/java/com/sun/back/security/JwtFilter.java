@@ -45,10 +45,10 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (ExpiredJwtException e) {
-                sendErrorResponse(response, "토큰이 만료되었습니다. 다시 로그인 해주세요.");
+                sendErrorResponse(response, request, "토큰이 만료되었습니다. 다시 로그인 해주세요.");
                 return;
             } catch (JwtException | IllegalArgumentException e) {
-                sendErrorResponse(response, "유효하지 않은 토큰입니다.");
+                sendErrorResponse(response, request, "유효하지 않은 토큰입니다.");
                 return;
             }
         }
@@ -57,17 +57,28 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     // 에러메시지 전달용 메서드
-    private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+    private void sendErrorResponse(HttpServletResponse response, HttpServletRequest request, String message) throws IOException {
         //  응답 상태 코드 설정 (401 Unauthorized)
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        // 응답 데이터 형식 설정
-        response.setContentType("application/json;charset=UTF-8");
+        // 요청 헤더 확인
+        String acceptHeader = request.getHeader("Accept");
 
-        // 실제 보낼 JSON 내용
-        String jsonResponse = String.format("{\"error\": \"Unauthorized\", \"message\": \"%s\"}", message);
+        if (acceptHeader != null && acceptHeader.contains("text/event-stream")) {
+            // SSE 요청일 경우 SSE 포맷에 맞게 응답
+            response.setContentType("text/event-stream;charset=UTF-8");
+            // SSE 에러 이벤트 포맷
+            response.getWriter().write("event: error\ndata: " + message);
+        } else {
+            // 일반 요청일 경우 기존처럼 JSON으로 응답
+            response.setContentType("application/json;charset=UTF-8");
+            // 실제 보낼 JSON 내용
+            String jsonResponse = String.format("{\"error\": \"Unauthorized\", \"message\": \"%s\"}", message);
+            // 4. 클라이언트에게 전달
+            response.getWriter().write(jsonResponse);
+        }
 
-        // 4. 클라이언트에게 전달
-        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();   // 확실하게 밀어내기
+
     }
 }

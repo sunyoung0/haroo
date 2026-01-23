@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Bell, MessageCircle, Heart, UserPlus } from "lucide-react";
 import { useNotifications } from "../../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { Notification } from "../../types/types";
 
 export const NotificationButton = () => {
   const { notifications, unreadCount, markAsRead } = useNotifications();
@@ -61,6 +62,29 @@ export const NotificationButton = () => {
     }
   };
 
+  const handleNotificationClick = (n: Notification) => {
+    markAsRead(n.id); // 읽음처리 먼저 실행
+    // URL 에서 ID 추출 -> 현재 /diaries/comment/3 이런 형식이라 끝에 id 번호만 추출
+    const parts = n.url.split("/");
+    const targetId = parts[parts.length - 1];
+
+    // 타입별 실제 페이지 경로 매핑
+    switch (n.type) {
+      case "COMMENT":
+      case "LIKE":
+        // 다이어리 상세 페이지로 이동
+        navigate(`/diaries/detail/${targetId}`);
+        break;
+      case "GROUP_INVITE":
+        navigate(`/diaries/${targetId}`);
+        break;
+      default:
+        console.warn("알 수 없는 알림 타입: ", n.type);
+    }
+
+    setShowDropdown(false);
+  };
+
   return (
     <div className="relative">
       {/* 종 아이콘 버튼 */}
@@ -108,8 +132,7 @@ export const NotificationButton = () => {
                     <div
                       key={n.id}
                       onClick={() => {
-                        markAsRead(n.id);
-                        navigate(n.url);
+                        handleNotificationClick(n);
                       }}
                       className={`group flex items-start gap-3 p-4 border-b last:border-0 cursor-pointer transition-colors ${
                         !n.isRead

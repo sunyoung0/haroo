@@ -70,6 +70,7 @@ public class DiaryMemberService {
     }
 
     // 해당 그룹의 멤버 리스트 조회
+    @Transactional
     public List<GroupMemberListResponse> getGroupMemberList(Long groupId) {
         // 그룹 존재 여부 확인
         if (!diaryGroupRepository.existsById(groupId)) {

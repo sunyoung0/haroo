@@ -53,6 +53,7 @@ export const NotificationProvider = ({
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      withCredentials: true,
       heartbeatTimeout: 60 * 60 * 1000, // 1시간 (연결 유지 시간)
     });
 

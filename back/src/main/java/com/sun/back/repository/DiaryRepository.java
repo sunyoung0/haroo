@@ -14,10 +14,12 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     List<Diary> findAllByGroupIdWithUser(@Param("groupId") Long groupId);
 
     // 1. 일기 리스트 조회용 (전체 객체 반환)
-    @Query("SELECT d FROM Diary d WHERE d.diaryGroup.id = :groupId " +
-            "AND d.isTemp = false " + // 이 조건이 있어야 임시 저장만 된 글들을 제외하고 불러올 수 있음
+    @Query("SELECT d FROM Diary d " +
+            "JOIN FETCH d.user " + // 작성자 정보를 한번에 가져옴
+            "WHERE d.diaryGroup.id = :groupId " +
+            "AND d.isTemp = false " +
             "AND (:userId IS NULL OR d.user.id = :userId) " +
-            "AND (:diaryDate IS NULL OR d.diaryDate LIKE CONCAT(:diaryDate, '%')) " +
+            "AND (:diaryDate IS NULL OR d.diaryDate = :diaryDate) " +
             "ORDER BY d.diaryDate DESC, d.createdAt DESC")
     List<Diary> findFilteredDiaries(@Param("groupId") Long groupId, @Param("userId") Long memberId, @Param("diaryDate") LocalDate diaryDate);
 
