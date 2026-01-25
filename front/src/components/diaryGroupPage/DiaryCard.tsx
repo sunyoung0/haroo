@@ -1,18 +1,38 @@
 import { MoreVertical, Heart, MessageCircle } from "lucide-react";
 import { diaryGroupList } from "../../types/types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 interface DiaryCardProps {
   diary: diaryGroupList;
 }
 
 const DiaryCard = ({ diary }: DiaryCardProps) => {
-
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const savedScrollPos = sessionStorage.getItem("diary_list_scroll");
+
+    if (savedScrollPos) {
+      // 대량을 불러오는 중이라면 약간의 시간 필요
+      window.scrollTo(0, parseInt(savedScrollPos));
+      // 한번 복구 후 지우기
+      sessionStorage.removeItem("diary_list_scroll");
+    }
+  }, [location]);
+
+  //  상세 페이지로 이동할 때 현재 위치 저장
+  const handleOnClick = (id: number) => {
+    sessionStorage.setItem('diary_list_scroll', window.scrollY.toString());
+    navigate(`/diaries/detail/${id}`);
+  };
 
   return (
-    <div onClick={() => navigate(`/diaries/detail/${diary.id}`)}
-    className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden transition-all hover:shadow-md cursor-pointer active:scale-[0.98]">
+    <div
+      onClick={() => handleOnClick(diary.id)}
+      className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden transition-all hover:shadow-md cursor-pointer active:scale-[0.98]"
+    >
       <div className="p-8">
         <div className="flex justify-between items-start">
           <h2 className="text-2xl font-black text-slate-900 leading-tight">
@@ -46,7 +66,9 @@ const DiaryCard = ({ diary }: DiaryCardProps) => {
             </div>
             <div className="flex items-center gap-1.5">
               <MessageCircle size={18} />
-              <span className="text-sm font-semibold">{diary.commentCount}</span>
+              <span className="text-sm font-semibold">
+                {diary.commentCount}
+              </span>
             </div>
           </div>
         </div>

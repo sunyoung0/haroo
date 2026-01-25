@@ -13,11 +13,13 @@ import api from "../api/axiosInstance";
 import axios from "axios";
 import { GetDiaryDetail } from "../types/types";
 import CommentSection from "../components/diaryDetailPage/CommentSection";
+import { useAuthStore } from "../store/useAuthStore";
 
 const DiaryDetailPage = () => {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
   const { diaryId } = useParams();
+  const { userEmail } = useAuthStore();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); // 외부 클릭 감지를 위한 ref
@@ -25,6 +27,7 @@ const DiaryDetailPage = () => {
   const [diariesDetail, setDiariesDetail] = useState<GetDiaryDetail | null>(
     null,
   );
+  const isMyPost = userEmail === diariesDetail?.writerEmail;
 
   const getDiaryDetail = async () => {
     try {
@@ -101,6 +104,8 @@ const DiaryDetailPage = () => {
         const status = error.response?.status;
         if (status === 404) {
           showSnackbar(serverMessage, "warning");
+        } else if (status === 400) {
+          showSnackbar(serverMessage, "warning");
         } else {
           showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
           console.error("Unknown error:", error);
@@ -126,6 +131,11 @@ const DiaryDetailPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diaryId]);
+
+  // 스크롤 맨 위로 올려줌
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center">
@@ -208,7 +218,15 @@ const DiaryDetailPage = () => {
             <div className="mt-16 flex justify-center">
               <button
                 onClick={handleLikeClick}
-                className="flex items-center gap-2 px-6 py-3 rounded-full border border-slate-100 bg-white shadow-sm hover:bg-pink-50 hover:border-pink-100 transition-all group active:scale-95"
+                disabled={isMyPost}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full border border-slate-100 bg-white shadow-sm hover:bg-pink-50 hover:border-pink-100 transition-all group active:scale-95 ${
+                  isMyPost
+                    ? "cursor-not-allowed opacity-50" // 내 글일 때의 스타일
+                    : "hover:text-red-500 text-gray-500" // 남의 글일 때의 스타일
+                }`}
+                title={
+                  isMyPost ? "본인 글에는 좋아요를 누를 수 없습니다" : "좋아요"
+                }
               >
                 <Heart
                   size={20}

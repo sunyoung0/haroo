@@ -11,6 +11,7 @@ public record GetDiaryDetailResponse(
    FeelingType feelingType,
    LocalDateTime createdAt,
    String date,
+   String email,
    String writerNickname,
    Integer commentCount,
    Integer likeCount,

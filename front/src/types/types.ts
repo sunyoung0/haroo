@@ -40,6 +40,7 @@ export type GetDiaryDetail = {
   feelingType: string;
   createdAt: string;
   date: string;
+  writerEmail: string;
   writerNickname: string;
   commentCount: number;
   likeCount: number;

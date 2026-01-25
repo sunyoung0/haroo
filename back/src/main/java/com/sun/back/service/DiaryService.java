@@ -176,6 +176,7 @@ public class DiaryService {
                 diary.getFeelingType(),
                 diary.getCreatedAt(),
                 diary.getDiaryDate(),
+                diary.getUser().getEmail(),
                 diary.getUser().getNickname(),
                 commentCount,
                 likeCount,

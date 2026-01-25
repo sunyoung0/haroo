@@ -17,6 +17,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     // 특정 날짜 이전에 생성된 알림 중, 이미 읽은 알림만 삭제
     void deleteByCreatedAtBeforeAndIsReadTrue(LocalDateTime date);
 
-    // (선택) 읽었든 안 읽었든 90일 이상 된 아주 오래된 알림은 무조건 삭제하고 싶을 때
-    void deleteByCreatedAtBefore(LocalDateTime date);
+    // 모든 알림 삭제할 때
+    void deleteAllByUser_Email(String email);
 }

@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
@@ -37,6 +34,20 @@ public class NotificationController {
     @PatchMapping("/notifications/read/{notificationId}")
     public ResponseEntity<Void> readNotification(@PathVariable Long notificationId) {
         notificationService.readNotification(notificationId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 알람 삭제
+    @DeleteMapping("/notification/delete/{notificationId}")
+    public ResponseEntity<Void> deleteNotification(@AuthenticationPrincipal String email, @PathVariable Long notificationId) {
+        notificationService.deleteNotification(email, notificationId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 알림 전체 삭제
+    @DeleteMapping("/notification/delete/all")
+    public ResponseEntity<Void> deleteAllNotification(@AuthenticationPrincipal String email) {
+        notificationService.deleteAllNotifications(email);
         return ResponseEntity.ok().build();
     }
 

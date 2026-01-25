@@ -4,6 +4,7 @@ import com.sun.back.dto.notification.NotificationResponse;
 import com.sun.back.entity.User;
 import com.sun.back.entity.diary.Notification;
 import com.sun.back.enums.NotificationType;
+import com.sun.back.exception.DiaryAccessException;
 import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.EmitterRepository;
 import com.sun.back.repository.NotificationRepository;
@@ -14,9 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +58,7 @@ public class NotificationService {
         }
 
         // 503 에러 방지를 위한 첫 더미 데이터 전송
-        sendToClient(user.getId(), "Connected! userId = " + user.getId());
+        sendToClient(user.getId(), "Connected!");
 
         return emitter;
     }
@@ -67,6 +66,11 @@ public class NotificationService {
     // 2 알림 전송 (댓글/좋아요 로직에서 호출)
     @Transactional
     public void send(User user, NotificationType type, String sender, String message, String url) {
+        // 알림 보낸 사람과 받는 사람이 같다면 알림 생성 X
+        if (user.getNickname().equals(sender)) {
+            return;
+        }
+
         // DB 저장
         Notification notification = notificationRepository.save(
                 Notification.builder()
@@ -124,4 +128,26 @@ public class NotificationService {
                 .orElseThrow(() -> new ResourceNotFoundException("알람이 존재하지 않습니다."));
         notification.markAsRead();  // 상태 변경
     }
+
+    // 알람 삭제
+    @Transactional
+    public void deleteNotification(String email, Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("알람이 존재하지 않습니다."));
+
+        // 권한 검증
+        if (!notification.getUser().getEmail().equals(email)) {
+            throw new DiaryAccessException("본인의 알람만 삭제할 수 있습니다.");
+        }
+
+        notificationRepository.delete(notification);
+    }
+
+    // 알람 전체 삭제
+    @Transactional
+    public void deleteAllNotifications(String email) {
+        // 알람을 받은 사람의 이메일로 모든 알림 삭제
+        notificationRepository.deleteAllByUser_Email(email);
+    }
+
 }

@@ -14,6 +14,8 @@ interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
   markAsRead: (id: number) => Promise<void>;
+  deleteNotification: (id: number) => Promise<void>;
+  deleteAllNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -42,7 +44,6 @@ export const NotificationProvider = ({
     const notificationList = async () => {
       const response = await api.get("/notifications");
       setNotifications(response.data);
-      console.log(response.data);
     };
     notificationList();
 
@@ -61,15 +62,14 @@ export const NotificationProvider = ({
       try {
         if (event.data.startsWith("{")) {
           const newNotification: Notification = JSON.parse(event.data);
-          console.log("새 실시간 알림 : ", newNotification);
-          setNotifications((prev) => [ newNotification, ...prev]);
+          setNotifications((prev) => [newNotification, ...prev]);
         } else {
-          console.log("서버 연결 메시지 : " , event.data);
+          console.log("서버 연결 메시지 : ", event.data);
         }
       } catch (error) {
         console.error("알림 파싱 에러: " + error);
       }
-    }
+    };
 
     eventSource.onopen = () => console.log("SSE 연결 성공!");
     eventSource.onerror = (err) => {
@@ -91,11 +91,36 @@ export const NotificationProvider = ({
     }
   };
 
+  // 알람 삭제 함수
+  const deleteNotification = async (id: number) => {
+    try {
+      await api.delete(`/notification/delete/${id}`);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // 알림 전체 삭제 함수
+  const deleteAllNotifications = async () => {
+    // 화면에서 먼저 다 지움
+    const previousNotifications = notifications;
+    setNotifications([]);
+
+    try {
+      await api.delete("/notification/delete/all");
+    } catch (error) {
+      // 삭제 실패 시 알림 내용 복구
+      setNotifications(previousNotifications);
+      console.log(error, "전체 삭제에 실패했습니다.");
+    }
+  };
+
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, markAsRead }}
+      value={{ notifications, unreadCount, markAsRead, deleteNotification, deleteAllNotifications }}
     >
       {children}
     </NotificationContext.Provider>

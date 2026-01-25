@@ -4,6 +4,7 @@ import com.sun.back.entity.User;
 import com.sun.back.entity.diary.Diary;
 import com.sun.back.entity.diary.DiaryLike;
 import com.sun.back.enums.NotificationType;
+import com.sun.back.exception.DiaryGroupException;
 import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryLikeRepository;
 import com.sun.back.repository.DiaryRepository;
@@ -30,6 +31,11 @@ public class DiaryLikeService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 본인 글인지 확인
+        if (diary.getUser().getEmail().equals(email)) {
+            throw new DiaryGroupException("본인의 글에는 좋아요를 누를 수 없습니다.");
+        }
 
         return diaryLikeRepository.findByDiaryAndUser(diary, user)
                 .map(like -> {

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Bell, MessageCircle, Heart, UserPlus } from "lucide-react";
+import { Bell, MessageCircle, Heart, UserPlus, X } from "lucide-react";
 import { useNotifications } from "../../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 import { Notification } from "../../types/types";
 
 export const NotificationButton = () => {
-  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, deleteNotification, deleteAllNotifications } =
+    useNotifications();
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
 
@@ -113,6 +114,19 @@ export const NotificationButton = () => {
           <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
             <div className="p-4 font-bold text-gray-800 border-b flex justify-between items-center bg-white">
               <span>알림</span>
+              {notifications.length > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm("모든 알림을 삭제하시겠습니까?")) {
+                      deleteAllNotifications();
+                    }
+                  }}
+                  className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors"
+                >
+                  전체 삭제
+                </button>
+              )}
               {unreadCount > 0 && (
                 <span className="text-xs font-normal text-sky-500">
                   새로운 알림 {unreadCount}개
@@ -134,7 +148,7 @@ export const NotificationButton = () => {
                       onClick={() => {
                         handleNotificationClick(n);
                       }}
-                      className={`group flex items-start gap-3 p-4 border-b last:border-0 cursor-pointer transition-colors ${
+                      className={`group relative flex items-start gap-3 p-4 border-b last:border-0 cursor-pointer transition-colors ${
                         !n.isRead
                           ? "bg-sky-50/40 hover:bg-sky-50"
                           : "bg-white hover:bg-slate-50"
@@ -147,7 +161,7 @@ export const NotificationButton = () => {
                         {style.icon}
                       </div>
 
-                      <div className="flex-1">
+                      <div className="flex-1 pr-6">
                         <p
                           className={`text-sm leading-relaxed ${!n.isRead ? "font-semibold text-gray-900" : "text-gray-600"}`}
                         >
@@ -156,10 +170,21 @@ export const NotificationButton = () => {
                         <p className="mt-1 text-xs text-gray-400">
                           {formatTimeAgo(n.createdAt)}
                         </p>
+                        {/* 3. 삭제(X) 버튼 */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // ⭐ 중요: 클릭 시 페이지 이동(부모 onClick) 방지
+                            deleteNotification(n.id);
+                          }}
+                          className="absolute top-4 right-3 p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                          title="알림 삭제"
+                        >
+                          <X size={14} />
+                        </button>
                       </div>
 
                       {!n.isRead && (
-                        <div className="mt-2 h-1.5 w-1.5 rounded-full bg-sky-500" />
+                        <div className="absolute bottom-4 right-4 h-1.5 w-1.5 rounded-full bg-sky-500" />
                       )}
                     </div>
                   );
