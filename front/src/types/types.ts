@@ -49,6 +49,7 @@ export type GetDiaryDetail = {
 
 export type GetCommentList = {
   id: number;
+  parentId: number;
   content: string;
   nickname: string;
   createdAt: string;

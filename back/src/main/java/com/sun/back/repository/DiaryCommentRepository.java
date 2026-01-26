@@ -9,7 +9,10 @@ import java.util.List;
 
 public interface DiaryCommentRepository extends JpaRepository<DiaryComment, Long> {
 
-    @Query("SELECT c FROM DiaryComment c JOIN FETCH c.user WHERE c.diary.id = :diaryId ORDER BY c.createdAt ASC")
+    @Query("SELECT c " +
+           "FROM DiaryComment c JOIN FETCH c.user " +
+           "WHERE c.diary.id = :diaryId " +
+           "ORDER BY COALESCE(c.parent.id, c.id) ASC, c.createdAt ASC")
     List<DiaryComment> findAllByDiaryIdOrderByCreatedAtAsc(@Param("diaryId") Long diaryId);
 
     int countByDiaryId(Long diaryId);

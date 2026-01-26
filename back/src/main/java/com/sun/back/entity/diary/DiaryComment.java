@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,6 +24,13 @@ public class DiaryComment extends BaseTimeEntity {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private DiaryComment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<DiaryComment> children = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diary_id")
     private Diary diary;
 
@@ -30,9 +39,10 @@ public class DiaryComment extends BaseTimeEntity {
     private User user;
 
     @Builder
-    public DiaryComment(Diary diary, User user, String content) {
+    public DiaryComment(Diary diary, User user, DiaryComment parent, String content) {
         this.diary = diary;
         this.user = user;
+        this.parent = parent;
         this.content = content;
     }
 

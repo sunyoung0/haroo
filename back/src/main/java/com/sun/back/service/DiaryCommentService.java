@@ -46,11 +46,17 @@ public class DiaryCommentService {
             throw new DiaryAccessException("댓글을 달 권한이 없습니다.");
         }
 
+        DiaryComment parent = (dto.parentId() != null) ?
+                diaryCommentRepository.findById(dto.parentId())
+                .orElseThrow(() -> new ResourceNotFoundException("부모 아이디가 존재하지 않습니다."))
+                : null;
+
         // 댓글 저장
         DiaryComment comment = DiaryComment.builder()
                 .content(dto.content())
                 .diary(diary)
                 .user(user)
+                .parent(parent)
                 .build();
 
         diaryCommentRepository.save(comment);
@@ -82,6 +88,7 @@ public class DiaryCommentService {
         return comments.stream()
                 .map(c -> new GetCommentResponse(
                         c.getId(),
+                        c.getParent() != null ? c.getParent().getId() : null,
                         c.getContent(),
                         c.getUser().getNickname(),
                         c.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
