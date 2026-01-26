@@ -8,10 +8,7 @@ import com.sun.back.entity.diary.DiaryComment;
 import com.sun.back.enums.NotificationType;
 import com.sun.back.exception.DiaryAccessException;
 import com.sun.back.exception.ResourceNotFoundException;
-import com.sun.back.repository.DiaryCommentRepository;
-import com.sun.back.repository.DiaryMemberRepository;
-import com.sun.back.repository.DiaryRepository;
-import com.sun.back.repository.UserRepository;
+import com.sun.back.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +26,7 @@ public class DiaryCommentService {
     private final UserRepository userRepository;
     private final DiaryMemberRepository diaryMemberRepository;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     // 다이어리 댓글 작성
     @Transactional
@@ -62,7 +60,7 @@ public class DiaryCommentService {
         diaryCommentRepository.save(comment);
 
         // 알림 발송
-        notificationService.send(diary.getUser(), NotificationType.COMMENT, user.getNickname(), (user.getNickname() + "님이 내 일기에 댓글을 남겼습니다." ), ("/diaries/comment/"+diaryId));
+        notificationService.send(diary.getUser(), NotificationType.COMMENT, user.getNickname(), (user.getNickname() + "님이 내 일기에 댓글을 남겼습니다." ), ("/diaries/comment/"+diaryId), comment.getId());
 
     }
 
@@ -123,6 +121,9 @@ public class DiaryCommentService {
         if (!comment.getUser().getEmail().equals(email)) {
             throw new DiaryAccessException("본인이 작성한 댓글만 삭제할 수 있습니다.");
         }
+
+        // 해당 댓글 알림도 같이 삭제
+        notificationRepository.deleteByTargetIdAndType(commentId, NotificationType.COMMENT);
 
         // 3. 삭제 실행
         diaryCommentRepository.delete(comment);

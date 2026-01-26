@@ -16,6 +16,7 @@ public class EmitterRepository {
         return sseEmitter;
     }
 
+    public void findById(Long userId) {emitters.get(userId);}
     public void deleteById(Long userId) {
         emitters.remove(userId);
     }

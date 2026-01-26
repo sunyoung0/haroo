@@ -8,6 +8,7 @@
 <br />
 
 ## 📋 프로젝트 개요
+
 - **프로젝트명**: 그룹 일기 관리 시스템 (Group Diary System)
 - **핵심 가치**: 실시간 연결성, 작성의 편의성, 직관적인 관리
 - **개발 배경**: 기존 공유 다이어리 서비스들의 불편한 시각화와 실시간 소통의 부재를 해결하고자 **"기록하는 즐거움과 보는 즐거움"**을 동시에 제공하는 통합 플랫폼을 기획하게 되었습니다.
@@ -67,6 +68,7 @@
 ## 🛠 Tech Stack
 
 ### 💻 Backend
+
 <p>
   <img src="https://img.shields.io/badge/Java_17-007396?style=for-the-badge&logo=java&logoColor=white" />
   <img src="https://img.shields.io/badge/Spring_Boot_3.x-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" />
@@ -76,6 +78,7 @@
 </p>
 
 ### 🎨 Frontend
+
 <p>
   <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />

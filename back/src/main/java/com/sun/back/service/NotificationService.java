@@ -15,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +67,7 @@ public class NotificationService {
 
     // 2 알림 전송 (댓글/좋아요 로직에서 호출)
     @Transactional
-    public void send(User user, NotificationType type, String sender, String message, String url) {
+    public void send(User user, NotificationType type, String sender, String message, String url, Long targetId) {
         // 알림 보낸 사람과 받는 사람이 같다면 알림 생성 X
         if (user.getNickname().equals(sender)) {
             return;
@@ -79,6 +81,7 @@ public class NotificationService {
                         .sender(sender)
                         .message(message)
                         .url(url)
+                        .targetId(targetId)
                         .build()
         );
 

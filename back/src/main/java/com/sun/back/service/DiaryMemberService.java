@@ -65,7 +65,7 @@ public class DiaryMemberService {
 
         diaryMemberRepository.save(newMember);
         // 알림 발송
-        notificationService.send(invitee, NotificationType.GROUP_INVITE, owner.getUser().getNickname(), (owner.getUser().getNickname() + "님이 그룹에 초대하셨습니다." ), ("/groups/members/" + groupId));
+        notificationService.send(invitee, NotificationType.GROUP_INVITE, owner.getUser().getNickname(), (owner.getUser().getNickname() + "님이 그룹에 초대하셨습니다." ), ("/groups/members/" + groupId), groupId);
 
     }
 

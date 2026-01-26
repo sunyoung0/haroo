@@ -2,6 +2,7 @@ package com.sun.back.repository;
 
 import com.sun.back.dto.notification.NotificationResponse;
 import com.sun.back.entity.diary.Notification;
+import com.sun.back.enums.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -19,4 +20,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // 모든 알림 삭제할 때
     void deleteAllByUser_Email(String email);
+
+    // 해당 댓글로 생성된 알림 삭제
+    void deleteByTargetIdAndType(Long targetId, NotificationType type);
 }

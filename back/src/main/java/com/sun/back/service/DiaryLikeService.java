@@ -8,6 +8,7 @@ import com.sun.back.exception.DiaryGroupException;
 import com.sun.back.exception.ResourceNotFoundException;
 import com.sun.back.repository.DiaryLikeRepository;
 import com.sun.back.repository.DiaryRepository;
+import com.sun.back.repository.NotificationRepository;
 import com.sun.back.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class DiaryLikeService {
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public String toggle(String email, Long diaryId) {
@@ -40,12 +42,13 @@ public class DiaryLikeService {
         return diaryLikeRepository.findByDiaryAndUser(diary, user)
                 .map(like -> {
                     diaryLikeRepository.delete(like);
+                    notificationRepository.deleteByTargetIdAndType(diaryId, NotificationType.LIKE);
                     return "좋아요 취소 완료";
                 })
                 .orElseGet(() -> {
                     diaryLikeRepository.save(new DiaryLike(diary, user));
                     // 알림 발송
-                    notificationService.send(diary.getUser(), NotificationType.LIKE, user.getNickname(), (user.getNickname() + "님이 내 일기에 좋아요를 남겼습니다." ), ("/diaries/like/" + diaryId));
+                    notificationService.send(diary.getUser(), NotificationType.LIKE, user.getNickname(), (user.getNickname() + "님이 내 일기에 좋아요를 남겼습니다." ), ("/diaries/like/" + diaryId), diaryId);
 
                     return "좋아요 완료";
                 });

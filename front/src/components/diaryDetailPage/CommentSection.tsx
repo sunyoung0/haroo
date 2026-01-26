@@ -102,7 +102,7 @@ const CommentSection = ({
     if (!newComment.trim()) return;
 
     try {
-      const parentIdForExpanding = replyTo ? replyTo.id : null; // ⭐️ 현재 부모 ID 백업
+      const parentIdForExpanding = replyTo ? replyTo.id : null; // 현재 부모 ID 백업
 
       await api.post(`/diaries/comment/${diaryId}`, {
         content: newComment,
@@ -372,7 +372,7 @@ const CommentSection = ({
             })}
           {comments.length === 0 && (
             <div className="py-10 text-center text-slate-300 text-sm">
-              첫 번째 댓글을 남겨보세요! ✨
+              첫 번째 댓글을 남겨보세요!
             </div>
           )}
         </div>

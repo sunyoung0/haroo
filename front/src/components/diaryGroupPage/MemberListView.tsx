@@ -73,9 +73,19 @@ const MemberListView = ({
                     <User />
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-bold text-slate-800 text-base">
-                      {member.nickname}
-                    </span>
+                    {/* 닉네임과 뱃지를 가로로 묶어주는 컨테이너 */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-slate-800 text-base">
+                        {member.nickname}
+                      </span>
+
+                      {member.userEmail === currentUserEmail && (
+                        <span className="w-fit h-fit border border-sky-500/30 text-sky-600 text-[9px] px-1.5 py-0.5 rounded-full font-black tracking-tighter bg-sky-50/50 leading-none flex items-center justify-center">
+                          ME
+                        </span>
+                      )}
+                    </div>
+
                     <span className="text-[11px] text-slate-400 font-medium">
                       참여일 : {member.joinedAt}
                     </span>

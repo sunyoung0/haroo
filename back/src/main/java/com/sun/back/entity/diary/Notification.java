@@ -30,15 +30,18 @@ public class Notification extends BaseTimeEntity {
 
     private String url;  // 클릭 시 이동할 링크
 
+    private Long targetId;  // 알림 대상의 ID ( 댓글 / 좋아요)
+
     private boolean isRead;     // 읽음 처리 여부
 
     @Builder
-    public Notification (User user, NotificationType type, String sender, String message, String url) {
+    public Notification (User user, NotificationType type, String sender, String message, String url, Long targetId) {
         this.user = user;
         this.type = type;
         this.sender = sender;
         this.message = message;
         this.url = url;
+        this.targetId = targetId;
     }
 
     public void markAsRead() {
