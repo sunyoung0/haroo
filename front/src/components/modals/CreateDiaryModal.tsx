@@ -3,6 +3,7 @@ import { X, User, Users, BookPlus } from "lucide-react";
 import api from "../../api/axiosInstance";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { CreateDiaryRequest } from "../../types/types";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 
 interface Props {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface Props {
 
 const CreateDiaryModal = ({ isOpen, onClose, onSuccess }: Props) => {
   const { showSnackbar } = useSnackbar();
+  const { errorHandler } = useErrorHandler();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isGroup, setIsGroup] = useState(false);
@@ -38,7 +40,7 @@ const CreateDiaryModal = ({ isOpen, onClose, onSuccess }: Props) => {
       setTitle(""); // 입력창 초기화
       setDescription("");
     } catch (error) {
-      showSnackbar("생성 실패. 다시 시도해주세요.", "error");
+      errorHandler(error, "다이어리 생성 중 문제가 발생했습니다.");
     } finally {
       setLoading(false);
     }

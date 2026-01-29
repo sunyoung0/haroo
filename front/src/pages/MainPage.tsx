@@ -7,10 +7,12 @@ import api from "../api/axiosInstance";
 import { UsersIcon, Book } from "lucide-react";
 import { DiaryGroup } from "../types/types";
 import { NotificationButton } from "../components/buttons/NotificationButton";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 const MainPage = () => {
   const navigate = useNavigate();
   const { userEmail, nickname, logout } = useAuthStore();
+  const { errorHandler } = useErrorHandler();
 
   const [diaryGroups, setDiaryGroups] = useState<DiaryGroup[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ const MainPage = () => {
       const response = await api.get("/groups");
       setDiaryGroups(response.data);
     } catch (error) {
-      console.error("다이어리 목록 로딩 실패: ", error);
+      errorHandler(error, "다이어리 목록을 로딩하는 중 문제가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -37,6 +39,7 @@ const MainPage = () => {
 
   useEffect(() => {
     fetchDiaries();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 컴포넌트 마운트 시 최초 1회 실행
 
   return (
@@ -67,7 +70,7 @@ const MainPage = () => {
             </button>
           </div>
         </header>
-        {/* 2. 필터 탭 부분: 헤더 바로 밑에 배치 */}
+        {/* 필터 탭 부분: 헤더 바로 밑에 배치 */}
         <div className="px-4 bg-white border-b border-slate-100 sticky top-[75px] z-20">
           <div className="flex items-center justify-around">
             {[

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSnackbar } from "../context/SnackbarContext";
 import { useAuthStore } from "../store/useAuthStore";
 import api from "../api/axiosInstance";
-import axios from "axios";
 
 import GroupHeader from "../components/diaryGroupPage/GroupHeader";
 import GroupTabs from "../components/diaryGroupPage/GroupTabs";
@@ -16,11 +15,13 @@ import EditNoticeModal from "../components/modals/EditNoticeModal";
 
 import { diaryGroupList } from "../types/types";
 import { MemberList } from "../types/types";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 const DiaryGroupPage = () => {
   const { groupId } = useParams();
   const { userEmail } = useAuthStore(); // Zustand에서 로그인 유저 정보 가져오기
   const { showSnackbar } = useSnackbar();
+  const { errorHandler } = useErrorHandler();
   const navigate = useNavigate();
 
   // 상태 관리
@@ -46,21 +47,7 @@ const DiaryGroupPage = () => {
         notice: response.data.groupNotice,
       });
     } catch (error) {
-      console.log("에러 발생 : ", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리를 불러오는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "다이어리 그룹을 불러오는 중 문제가 발생했습니다.");
     }
   };
 
@@ -73,19 +60,7 @@ const DiaryGroupPage = () => {
       setIsNoticeModalOpen(false);
       showSnackbar("공지사항이 수정되었습니다.", "success");
     } catch (error) {
-      console.error("공지사항 수정 실패:", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "공지사항 수정 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 400) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "공지사항 수정 중 문제가 발생했습니다.");
     }
   };
 
@@ -94,19 +69,7 @@ const DiaryGroupPage = () => {
       const response = await api.get(`/groups/members/${groupId}`);
       setMembers(response.data);
     } catch (error) {
-      console.error("멤버 리스트를 불러오는 중 오류 발생 :", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "멤버 리스트를 불러오는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 400) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "멤버 리스트를 불러오는 중 문제가 발생했습니다.");
     }
   };
 
@@ -118,22 +81,7 @@ const DiaryGroupPage = () => {
       setIsInviteModalOpen(false);
       fetchMembers();
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "멤버를 초대하는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 400) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "멤버를 초대하는 중 문제가 발생했습니다.");
     }
   };
 
@@ -156,22 +104,7 @@ const DiaryGroupPage = () => {
       }
       navigate("/");
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리 삭제/탈퇴 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 400) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "그룹을 삭제/탈퇴 하는 중 문제가 발생했습니다.");
     }
   };
 
@@ -186,20 +119,7 @@ const DiaryGroupPage = () => {
       showSnackbar("멤버를 강퇴했습니다.", "success");
       fetchMembers(); // 목록 새로고침
     } catch (error) {
-      showSnackbar("강퇴 처리에 실패했습니다.", "error");
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message || "멤버 강퇴 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 400) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "멤버 강퇴 중 문제가 발생했습니다.");
     }
   };
 

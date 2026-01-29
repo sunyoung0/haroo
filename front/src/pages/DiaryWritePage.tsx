@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import api from "../api/axiosInstance";
-import axios from "axios";
 import { useSnackbar } from "../context/SnackbarContext";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 // 기분 타입 및 이모지 설정 (FEELING_TYPES)
 const FEELING_TYPES = [
@@ -45,7 +45,7 @@ const DiaryWritePage = () => {
   const { groupId, diaryId } = useParams();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
-
+  const { errorHandler } = useErrorHandler();
   const isEditMode = Boolean(diaryId); // 수정 인지 확인
 
   const [title, setTitle] = useState("");
@@ -80,21 +80,7 @@ const DiaryWritePage = () => {
       }
       navigate(-1);
     } catch (error) {
-      console.error("저장 실패:", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리를 작성하는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "일기 작성 중 문제가 발생했습니다.");
     }
   };
 

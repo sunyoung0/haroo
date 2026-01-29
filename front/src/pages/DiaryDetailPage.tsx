@@ -10,14 +10,15 @@ import {
 } from "lucide-react";
 import { useSnackbar } from "../context/SnackbarContext";
 import api from "../api/axiosInstance";
-import axios from "axios";
 import { GetDiaryDetail } from "../types/types";
 import CommentSection from "../components/diaryDetailPage/CommentSection";
 import { useAuthStore } from "../store/useAuthStore";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 const DiaryDetailPage = () => {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+    const { errorHandler } = useErrorHandler();
   const { diaryId } = useParams();
   const { userEmail } = useAuthStore();
 
@@ -34,21 +35,7 @@ const DiaryDetailPage = () => {
       const response = await api.get(`/diaries/detail/${diaryId}`);
       setDiariesDetail(response.data);
     } catch (error) {
-      console.log("에러 발생 : ", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리를 불러오는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "일기를 불러오는 중 문제가 발생했습니다.");
     }
   };
 
@@ -60,21 +47,7 @@ const DiaryDetailPage = () => {
       showSnackbar("일기가 삭제되었습니다.", "success");
       navigate(-1); // 이전 페이지로 이동
     } catch (error) {
-      console.log("에러 발생 : ", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리를 불러오는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "일기를 삭제하는 중 문제가 발생했습니다.");
     }
   };
 
@@ -97,20 +70,7 @@ const DiaryDetailPage = () => {
           : diariesDetail.likeCount + 1,
       });
     } catch (error) {
-      console.log("에러 발생 : ", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message || "좋아요 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 400) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "좋아요를 누르는 중 문제가 발생했습니다.");
     }
   };
 

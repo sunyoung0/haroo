@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageCircle } from "lucide-react";
 import api from "../../api/axiosInstance";
-import axios from "axios";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { GetCommentList } from "../../types/types";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 
 interface CommentSectionProps {
   diaryId: string | undefined;
@@ -27,6 +27,7 @@ const CommentSection = ({
   const [expandedComments, setExpandedComments] = useState<number[]>([]); // 답글창 목록 관리
   const scrollRef = useRef<HTMLDivElement>(null);
   const { showSnackbar } = useSnackbar();
+  const { errorHandler } = useErrorHandler();
 
   // 답글 취소 함수
   const cancelReply = () => setReplyTo(null);
@@ -43,7 +44,10 @@ const CommentSection = ({
   // 스크롤 이동 함수
   const scrollToBottom = () => {
     setTimeout(() => {
-      scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      scrollRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }, 100); // 목록이 렌더링될 시간을 조금 줌
   };
 
@@ -78,21 +82,7 @@ const CommentSection = ({
       const response = await api.get(`/diaries/comment/${diaryId}`);
       setComments(response.data || []);
     } catch (error) {
-      console.error("댓글 로드 실패", error);
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리를 불러오는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "댓글을 불러오는 중 문제가 발생했습니다.");
     }
   };
 
@@ -125,20 +115,7 @@ const CommentSection = ({
       scrollToBottom();
       showSnackbar("댓글이 등록되었습니다.", "success");
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리를 불러오는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "댓글 작성 중 문제가 발생했습니다.");
     }
   };
 
@@ -151,20 +128,7 @@ const CommentSection = ({
       onCommentChange();
       showSnackbar("댓글이 삭제되었습니다.", "success");
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const serverMessage =
-          error.response?.data?.message ||
-          "다이어리를 불러오는 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 404) {
-          showSnackbar(serverMessage, "warning");
-        } else if (status === 403) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "댓글을 삭제하는 중 문제가 발생했습니다.");
     }
   };
 
