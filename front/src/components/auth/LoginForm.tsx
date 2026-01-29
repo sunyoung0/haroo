@@ -1,5 +1,4 @@
 import api from "../../api/axiosInstance";
-import axios from "axios";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AuthLayOut from "./AuthLayout";
@@ -9,10 +8,12 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormData } from "../../utils/authValidation";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 
 function LoginForm() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+  const { errorHandler } = useErrorHandler();
 
   const login = useAuthStore((state) => state.login); // 로그인 액션 가져오기
 
@@ -45,20 +46,7 @@ function LoginForm() {
       showSnackbar("로그인에 성공했습니다.", "success");
       setTimeout(() => navigate("/"), 1500);
     } catch (error) {
-      // Axios 에러인지 확인하는 타입 가드
-      if (axios.isAxiosError(error)) {
-        // 이 안에서 error를 AxiosError 타입으로 인식
-        const serverMessage =
-          error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 401 || status === 400) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          // 네트워크 에러나 코드 에러 등 Axios 에러가 아닌 경우
-          showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-          console.error("Unknown error:", error);
-        }
-      }
+      errorHandler(error, "로그인 중 오류가 발생했습니다.");
     }
   };
 

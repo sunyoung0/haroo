@@ -7,10 +7,12 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, SignUpFormData } from "../../utils/authValidation";
+import { useErrorHandler } from "../../hooks/useErrorHandler";
 
 function SignUp() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+  const { errorHandler } = useErrorHandler();
 
   const [showPassword, setShowPassword] = useState(false); // 비밀번호 보이기
 
@@ -33,30 +35,12 @@ function SignUp() {
     try {
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
-        data
+        data,
       );
       showSnackbar("회원가입 성공! 로그인 페이지로 이동합니다.", "success");
       setTimeout(() => navigate("/auth/login"), 1500);
     } catch (error) {
-      console.error("회원가입 실패 : ", error);
-
-      // Axios 에러인지 확인하는 타입 가드
-      if (axios.isAxiosError(error)) {
-        // 이 안에서 error를 AxiosError 타입으로 인식
-        const serverMessage =
-          error.response?.data?.message || "회원가입 중 오류가 발생했습니다.";
-        const status = error.response?.status;
-        if (status === 409) {
-          showSnackbar(serverMessage, "warning");
-        } else {
-          // 400 Bad Request: 입력값 형식 오류 등
-          showSnackbar(serverMessage, "warning");
-        }
-      } else {
-        // 네트워크 에러나 코드 에러 등 Axios 에러가 아닌 경우
-        showSnackbar("예상치 못한 오류가 발생했습니다.", "error");
-        console.error("Unknown error:", error);
-      }
+      errorHandler(error, "회원가입 중 오류가 발생했습니다.");
     }
   };
 

@@ -173,7 +173,7 @@ export const NotificationButton = () => {
                         {/* 3. 삭제(X) 버튼 */}
                         <button
                           onClick={(e) => {
-                            e.stopPropagation(); // ⭐ 중요: 클릭 시 페이지 이동(부모 onClick) 방지
+                            e.stopPropagation(); // 클릭 시 페이지 이동(부모 onClick) 방지
                             deleteNotification(n.id);
                           }}
                           className="absolute top-4 right-3 p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
