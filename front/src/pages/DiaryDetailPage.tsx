@@ -14,26 +14,30 @@ import { GetDiaryDetail } from "../types/types";
 import CommentSection from "../components/diaryDetailPage/CommentSection";
 import { useAuthStore } from "../store/useAuthStore";
 import { useErrorHandler } from "../hooks/useErrorHandler";
+import { FEELING_TYPES } from "../constants/feeling";
 
 const DiaryDetailPage = () => {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
-    const { errorHandler } = useErrorHandler();
+  const { errorHandler } = useErrorHandler();
   const { diaryId } = useParams();
   const { userEmail } = useAuthStore();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); // 외부 클릭 감지를 위한 ref
 
-  const [diariesDetail, setDiariesDetail] = useState<GetDiaryDetail | null>(
-    null,
-  );
+  const [diariesDetail, setDiariesDetail] = useState<GetDiaryDetail | null>(null);
   const isMyPost = userEmail === diariesDetail?.writerEmail;
+
+  const [feelingId, setFeelingId] = useState("HAPPY");
+  // 선택된 기분의 전체 데이터(이모지, 컬러 등)를 찾음
+  const currentFeeling = FEELING_TYPES.find((f) => f.id === feelingId) || FEELING_TYPES[0];
 
   const getDiaryDetail = async () => {
     try {
       const response = await api.get(`/diaries/detail/${diaryId}`);
       setDiariesDetail(response.data);
+      setFeelingId(response.data.feelingType);
     } catch (error) {
       errorHandler(error, "일기를 불러오는 중 문제가 발생했습니다.");
     }
@@ -62,8 +66,7 @@ const DiaryDetailPage = () => {
 
     try {
       await api.post(`/diaries/like/${diaryId}`);
-      setDiariesDetail({
-        ...diariesDetail,
+      setDiariesDetail({ ...diariesDetail,
         isLike: !diariesDetail.isLike,
         likeCount: diariesDetail.isLike
           ? diariesDetail.likeCount - 1
@@ -162,8 +165,11 @@ const DiaryDetailPage = () => {
 
               <div className="h-2 w-[1px] bg-slate-200" />
 
-              <div className="flex items-center gap-1.5 text-xs font-bold text-sky-600">
-                <span className="text-lg">{diariesDetail?.feelingType}</span>
+              <div
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-bold ${currentFeeling.color}`}
+              >
+                <span className="text-lg">{currentFeeling.emoji}</span>{" "}
+                <span className="text-xs">{currentFeeling.label}</span>{" "}
               </div>
             </div>
           </div>

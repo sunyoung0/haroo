@@ -5,7 +5,7 @@ public enum FeelingType {
     SAD,        // 슬픔
     ANGRY,      // 화남
     ANXIOUS,    // 불안
-    CLAM,       // 평온
+    CALM,       // 평온
     TIRED,      // 피곤
     EXCITED     // 설렘
 }
