@@ -27,7 +27,7 @@ public class DiaryService {
 
     // 일기 작성
     @Transactional
-    public String createDiary(String email, Long groupId, CreateDiaryRequest dto) {
+    public Long createDiary(String email, Long groupId, CreateDiaryRequest dto) {
 
         // 작성자 존재 확인
         User user = userRepository.findByEmail(email)
@@ -52,7 +52,7 @@ public class DiaryService {
             // 내용 업데이트 및 임시 저장 해제
             existingDiary.updateDiary(dto.title(), dto.content(), dto.diaryDate(), dto.feelingType());
             existingDiary.publish();    // isTemp = false로 변경
-            return "일기 작성 완료";
+            return existingDiary.getId();
         }
 
         // 임시 저장된 글이 없을 경우
@@ -66,9 +66,7 @@ public class DiaryService {
                 .isTemp(false)  // 정식 등록
                 .build();
 
-        diaryRepository.save(diary);
-
-        return "일기 작성이 완료되었습니다.";
+        return diaryRepository.save(diary).getId();
     }
 
     // 일기 임시 저장 기능
@@ -102,6 +100,21 @@ public class DiaryService {
                 .build();
 
         return diaryRepository.save(newTempDiary).getId();
+    }
+
+    // 일기 임시 저장 조회
+    @Transactional(readOnly = true)
+    public TempDiaryResponse getLatestTempDiary(String email, Long groupId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+
+        DiaryGroup group = diaryGroupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("그룹을 찾을 수 없습니다."));
+
+        // 최근 임시 저장본 조회
+        return diaryRepository.findTopByUserAndDiaryGroupAndIsTempTrueOrderByUpdatedAtDesc(user, group)
+                .map(TempDiaryResponse::from)
+                .orElse(null);
     }
 
     // 해당 그룹에서 일기 리스트 조회

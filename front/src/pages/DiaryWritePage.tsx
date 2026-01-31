@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import api from "../api/axiosInstance";
@@ -6,6 +6,15 @@ import { useSnackbar } from "../context/SnackbarContext";
 import { useErrorHandler } from "../hooks/useErrorHandler";
 import { FEELING_TYPES } from "../constants/feeling";
 import { debounce } from "lodash";
+
+type DiarySaveResponse = {
+  title: string;
+  content: string;
+  diaryDate: string;
+  feelingType: string;
+  diaryId?: number | null;
+  groupId?: number;
+};
 
 const DiaryWritePage = () => {
   const { groupId, diaryId } = useParams();
@@ -20,19 +29,23 @@ const DiaryWritePage = () => {
     new Date().toISOString().split("T")[0],
   );
   const [feelingType, setFeelingType] = useState("HAPPY");
-  const [tempDiaryId, setTempDiaryId] = useState<number | null>(null);
+  const tempDiaryId = useRef<number | null>(null);
 
   // 임시 저장 함수
-  const handleTempSave = async (data: any) => {
+  const handleTempSave = async (data: Partial<DiarySaveResponse>) => {
+    // 임시 저장 버튼 클릭 시에도 디바운싱 취소 후 실행
+    delayedSave.cancel();
     try {
-      const response = await api.post("/diaries/temp", {
+      const tempSaveDto = {
         ...data,
-        diaryId: tempDiaryId, // ID가 있으면 수정, 없으면 신규 생성
+        diaryId: tempDiaryId.current,
         groupId: Number(groupId),
-      });
+      };
 
-      if (!tempDiaryId && response.data) {
-        setTempDiaryId(response.data);
+      const response = await api.post<number>("/diaries/temp", tempSaveDto);
+
+      if (!tempDiaryId.current && response.data) {
+        tempDiaryId.current = response.data;
       }
       console.log("임시저장 완료");
     } catch (error) {
@@ -41,9 +54,10 @@ const DiaryWritePage = () => {
   };
 
   // lodash의 debounce로 감싸기, useCallback을 써야 리렌더링 시 함수가 새로 만들어지지 않음
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const delayedSave = useCallback(
-    debounce((data) => handleTempSave(data), 3000), // 3초 뒤 실행
-    [tempDiaryId], // ID가 바뀌면 함수 갱신
+    debounce((data: Partial<DiarySaveResponse>) => handleTempSave(data), 3000), // 3초 뒤 실행
+    [tempDiaryId, groupId], // ID가 바뀌면 함수 갱신
   );
 
   const handleSave = async () => {
@@ -52,12 +66,15 @@ const DiaryWritePage = () => {
       return;
     }
 
+    delayedSave.cancel(); // 일반 저장 시 디바운스 취소
+
     try {
-      const diaryDto = {
+      const diaryDto: DiarySaveResponse = {
         title,
         content,
         diaryDate,
         feelingType,
+        diaryId: tempDiaryId.current,
       };
 
       if (isEditMode) {
@@ -67,8 +84,9 @@ const DiaryWritePage = () => {
       } else {
         // 새 작성 요청 (POST)
         await api.post(`/diaries/${groupId}`, diaryDto);
-        showSnackbar("오늘의 기록이 저장되었습니다!", "success");
+        showSnackbar("일기 작성에 성공하였습니다!", "success");
       }
+      tempDiaryId.current = null; // ID 초기화
       navigate(-1);
     } catch (error) {
       errorHandler(error, "일기 작성 중 문제가 발생했습니다.");
@@ -105,6 +123,44 @@ const DiaryWritePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diaryId, isEditMode]);
 
+  useEffect(() => {
+    const fetchTempDiary = async () => {
+      // 수정 시엔 임시 저장본을 불러오지 않음
+      // if (isEditMode) return;
+
+      if (!groupId) return;
+
+      try {
+        const response = await api.get(`/diaries/temp/${groupId}`);
+
+        if (response.data) {
+          const { id, title, content, feelingType, diaryDate } = response.data;
+          // 서버 데이터를 상태에 입력
+          tempDiaryId.current = id;
+          setTitle(title || "");
+          setContent(content || "");
+          setFeelingType(feelingType || "HAPPY");
+          if (diaryDate) setDiaryDate(diaryDate);
+
+          showSnackbar("작성 중이던 내용을 불러왔습니다.", "success");
+        }
+      } catch (error) {
+        errorHandler(error, "임시 저장본을 불러오는데 문제가 발생했습니다.");
+      }
+    };
+    fetchTempDiary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId]);
+
+  useEffect(() => {
+    // 제목이나 내용이 아예 비어있으면 자동 저장 예약 자체를 안 함
+    if (!title.trim() && !content.trim()) return;
+
+    delayedSave({ title, content, feelingType, diaryDate });
+
+    return () => delayedSave.cancel();
+  }, [title, content, feelingType, diaryDate, delayedSave]);
+
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center">
       <div className="w-full max-w-2xl bg-white shadow-sm flex flex-col">
@@ -123,7 +179,9 @@ const DiaryWritePage = () => {
           </div>
           <div>
             <button
-              onClick={handleTempSave}
+              onClick={() =>
+                handleTempSave({ title, content, diaryDate, feelingType })
+              }
               className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-sky-100"
             >
               임시저장

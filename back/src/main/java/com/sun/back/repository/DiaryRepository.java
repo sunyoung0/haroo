@@ -1,12 +1,15 @@
 package com.sun.back.repository;
 
+import com.sun.back.entity.User;
 import com.sun.back.entity.diary.Diary;
+import com.sun.back.entity.diary.DiaryGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
@@ -27,4 +30,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     @Query("SELECT DISTINCT d.diaryDate FROM Diary d WHERE d.diaryGroup.id = :groupId " +
             "AND (:diaryDate IS NULL OR d.diaryDate LIKE CONCAT(:diaryDate, '%'))")
     List<String> findByEntryDatesByMonth(@Param("groupId") Long groupId, @Param("diaryDate") String diaryDate);
+
+    // 일기 임시 저장 조회용
+    Optional<Diary> findTopByUserAndDiaryGroupAndIsTempTrueOrderByUpdatedAtDesc(User user, DiaryGroup diaryGroup);
 }

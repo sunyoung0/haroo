@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: back
+  security:
+    user:
+      name: user
+      password: 1234
+
+  datasource:
+    url: jdbc:mariadb://localhost:3310/diary
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: 1234
+
+  jpa:
+    generate-ddl: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+      default_batch_fetch_size: 100 # 100개씩 한꺼번에 묶어서 조회

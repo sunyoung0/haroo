@@ -18,7 +18,7 @@ public class DiaryController {
 
     // 일기 작성
     @PostMapping("/diaries/{groupId}")
-    public ResponseEntity<String> crateDiary(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody CreateDiaryRequest dto) {
+    public ResponseEntity<Long> crateDiary(@AuthenticationPrincipal String email, @PathVariable Long groupId, @RequestBody CreateDiaryRequest dto) {
         return ResponseEntity.ok(diaryService.createDiary(email, groupId, dto));
     }
 
@@ -26,6 +26,13 @@ public class DiaryController {
     @PostMapping("/diaries/temp")
     public ResponseEntity<Long> tempSave(@AuthenticationPrincipal String email, @RequestBody DiaryTempRequest dto) {
         return ResponseEntity.ok(diaryService.tempSaveDiary(email, dto));
+    }
+
+    // 일기 임시 저장 조회
+    @GetMapping("/diaries/temp/{groupId}")
+    public ResponseEntity<TempDiaryResponse> getTempDiary(@AuthenticationPrincipal String email, @PathVariable Long groupId) {
+        TempDiaryResponse response = diaryService.getLatestTempDiary(email, groupId);
+        return ResponseEntity.ok(response);
     }
 
     // 해당 그룹의 일기 리스트 불러오기
