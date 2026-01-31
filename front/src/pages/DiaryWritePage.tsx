@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import api from "../api/axiosInstance";
 import { useSnackbar } from "../context/SnackbarContext";
 import { useErrorHandler } from "../hooks/useErrorHandler";
 import { FEELING_TYPES } from "../constants/feeling";
+import { debounce } from "lodash";
 
 const DiaryWritePage = () => {
   const { groupId, diaryId } = useParams();
@@ -19,6 +20,31 @@ const DiaryWritePage = () => {
     new Date().toISOString().split("T")[0],
   );
   const [feelingType, setFeelingType] = useState("HAPPY");
+  const [tempDiaryId, setTempDiaryId] = useState<number | null>(null);
+
+  // 임시 저장 함수
+  const handleTempSave = async (data: any) => {
+    try {
+      const response = await api.post("/diaries/temp", {
+        ...data,
+        diaryId: tempDiaryId, // ID가 있으면 수정, 없으면 신규 생성
+        groupId: Number(groupId),
+      });
+
+      if (!tempDiaryId && response.data) {
+        setTempDiaryId(response.data);
+      }
+      console.log("임시저장 완료");
+    } catch (error) {
+      errorHandler(error, "임시 저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  // lodash의 debounce로 감싸기, useCallback을 써야 리렌더링 시 함수가 새로 만들어지지 않음
+  const delayedSave = useCallback(
+    debounce((data) => handleTempSave(data), 3000), // 3초 뒤 실행
+    [tempDiaryId], // ID가 바뀌면 함수 갱신
+  );
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
@@ -48,6 +74,16 @@ const DiaryWritePage = () => {
       errorHandler(error, "일기 작성 중 문제가 발생했습니다.");
     }
   };
+
+  useEffect(() => {
+    // 아무 내용이 없으면 저장하지 않음
+    if (!title && !content) return;
+
+    delayedSave({ title, content, feelingType });
+
+    // 컴포넌트가 사라질 때 대기중인 예약 취소
+    return () => delayedSave.cancel();
+  }, [title, content, feelingType, delayedSave]);
 
   // 수정 모드일 경우 기존 데이터 불러오기
   useEffect(() => {
@@ -85,13 +121,20 @@ const DiaryWritePage = () => {
               {isEditMode ? "일기 수정" : "일기 작성"}
             </h1>
           </div>
-
-          <button
-            onClick={handleSave}
-            className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-sky-100"
-          >
-            {isEditMode ? "수정 완료" : "저장"}
-          </button>
+          <div>
+            <button
+              onClick={handleTempSave}
+              className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-sky-100"
+            >
+              임시저장
+            </button>
+            <button
+              onClick={handleSave}
+              className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-sky-100"
+            >
+              {isEditMode ? "수정 완료" : "저장"}
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 flex flex-col p-6 overflow-y-auto">
