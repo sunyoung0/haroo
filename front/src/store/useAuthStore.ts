@@ -4,12 +4,14 @@ import { persist } from 'zustand/middleware';
 interface AuthState {
   token: string | null;
   userEmail: string | null;
+  userId: number | null;
   nickname: string | null;
   isLoggedIn: boolean;
 
   // 액션들
-  login: (token: string, email: string, nickname: string) => void;
+  login: (token: string, email: string, userId: number, nickname: string) => void;
   logout: () => void;
+  setNickname: (nickname: string) => void;  // 닉네임만 업데이트
 }
 
 export const useAuthStore = create<AuthState>() (
@@ -17,13 +19,17 @@ export const useAuthStore = create<AuthState>() (
     (set) => ({
       token: null,
       userEmail: null,
+      userId: null,
       nickname: null,
       isLoggedIn: false,
 
-      login: (token, email, nickname) =>
+      setNickname: (nickname) => set({ nickname }),
+
+      login: (token, email, userId, nickname) =>
         set({
           token,
           userEmail: email,
+          userId,
           nickname,
           isLoggedIn: true
         }),
@@ -31,6 +37,7 @@ export const useAuthStore = create<AuthState>() (
         logout: () => set({
           token: null,
           userEmail: null,
+          userId: null,
           nickname: null,
           isLoggedIn: false
         }),

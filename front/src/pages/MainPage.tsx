@@ -11,7 +11,7 @@ import { useErrorHandler } from "../hooks/useErrorHandler";
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const { userEmail, nickname, logout } = useAuthStore();
+  const { userId, nickname, logout } = useAuthStore();
   const { errorHandler } = useErrorHandler();
 
   const [diaryGroups, setDiaryGroups] = useState<DiaryGroup[]>([]);
@@ -39,7 +39,7 @@ const MainPage = () => {
 
   useEffect(() => {
     fetchDiaries();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 컴포넌트 마운트 시 최초 1회 실행
 
   return (
@@ -55,18 +55,17 @@ const MainPage = () => {
               {nickname || "User"} 님의 다이어리
             </h1>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full text-slate-500 text-xs font-semibold border border-slate-100">
-              <User className="w-3.5 h-3.5" />
-              <span>{userEmail || "User"}</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(`/mypage/${userId}`)} className="p-2.5 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-95">
+              <User size={20} />
+            </button>
             <NotificationButton />
             <button
               onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+              className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all active:scale-95"
               title="로그아웃"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut size={20} />
             </button>
           </div>
         </header>

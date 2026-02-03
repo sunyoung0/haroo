@@ -94,7 +94,7 @@ export const NotificationButton = () => {
         className="relative p-2 rounded-full hover:bg-slate-100 transition-colors active:scale-95"
       >
         <Bell
-          size={24}
+          size={20}
           className={unreadCount > 0 ? "text-sky-500" : "text-gray-500"}
         />
         {unreadCount > 0 && (

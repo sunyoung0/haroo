@@ -38,10 +38,10 @@ function LoginForm() {
       const response = await api.post(`/auth/login`, data);
 
       // 백엔드 응답에서 토큰 추출 (응답 구조에 따라 수정 필요)
-      const { accessToken, email, nickname } = response.data;
+      const { accessToken, email, userId, nickname } = response.data;
 
       // Zustand 스토어에 저장 (localStorage에 자동 반영됨)
-      login(accessToken, email, nickname);
+      login(accessToken, email, userId, nickname);
 
       showSnackbar("로그인에 성공했습니다.", "success");
       setTimeout(() => navigate("/"), 1500);

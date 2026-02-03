@@ -13,6 +13,7 @@ import DiaryGroupPage from "./pages/DiaryGroupPage";
 import DiaryWritePage from "./pages/DiaryWritePage";
 import DiaryDetailPage from "./pages/DiaryDetailPage";
 import { NotificationProvider } from "./context/NotificationContext";
+import MyPage from "./pages/MyPage";
 
 // 루트  경로에서 로그인 여부를 판단하여 페이지 선택해줌
 // eslint-disable-next-line react-refresh/only-export-components
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
   {
     path: "/auth/register",
     element: <SignUp />,
+  },
+  {
+    path: "/mypage/:uerId",
+    element: <MyPage />,
   },
   {
     path: "/diaries/:groupId",

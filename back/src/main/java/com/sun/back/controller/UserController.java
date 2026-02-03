@@ -1,7 +1,6 @@
 package com.sun.back.controller;
 
 import com.sun.back.dto.user.*;
-import com.sun.back.entity.User;
 import com.sun.back.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

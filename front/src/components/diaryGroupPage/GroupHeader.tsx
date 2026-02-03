@@ -1,4 +1,4 @@
-import { ArrowLeft, Settings, Trash2, LogOut, Pen } from "lucide-react"; // 아이콘 추가
+import { ChevronLeft, Settings, Trash2, LogOut, Pen } from "lucide-react"; // 아이콘 추가
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NotificationButton } from "../buttons/NotificationButton";
@@ -26,7 +26,7 @@ const GroupHeader = ({
         onClick={() => navigate("/")}
         className="p-1 text-gray-600 hover:bg-slate-100 rounded-full transition-colors"
       >
-        <ArrowLeft size={24} />
+        <ChevronLeft size={24} />
       </button>
 
       {/* 중앙: 제목 */}
