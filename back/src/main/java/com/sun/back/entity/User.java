@@ -26,6 +26,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    private String profileImage;
+    
     // 한명의 유저는 여러개의 다이어리 멤버(오너)가 될 수 있음
     @OneToMany(mappedBy = "user")
     private List<DiaryMember> diaryMembers = new ArrayList<>();
