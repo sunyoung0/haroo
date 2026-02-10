@@ -6,12 +6,14 @@ interface AuthState {
   userEmail: string | null;
   userId: number | null;
   nickname: string | null;
+  profileImage: string | null;
   isLoggedIn: boolean;
 
   // 액션들
   login: (token: string, email: string, userId: number, nickname: string) => void;
   logout: () => void;
   setNickname: (nickname: string) => void;  // 닉네임만 업데이트
+  setProfileImage: (profileImage: string) => void;
 }
 
 export const useAuthStore = create<AuthState>() (
@@ -21,9 +23,11 @@ export const useAuthStore = create<AuthState>() (
       userEmail: null,
       userId: null,
       nickname: null,
+      profileImage: null,
       isLoggedIn: false,
 
       setNickname: (nickname) => set({ nickname }),
+      setProfileImage: (profileImage) => set({ profileImage}),
 
       login: (token, email, userId, nickname) =>
         set({
@@ -39,6 +43,7 @@ export const useAuthStore = create<AuthState>() (
           userEmail: null,
           userId: null,
           nickname: null,
+          profileImage: null,
           isLoggedIn: false
         }),
     }),

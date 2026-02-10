@@ -82,4 +82,14 @@ public class UserService {
 
         user.updateNickname(newNickname);
     }
+
+    // 프로필 이미지 등록
+    @Transactional
+    public String updateProfileImage(String email, String profileImage) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        user.updateProfileImage(profileImage);
+        return user.getProfileImage();
+    }
 }

@@ -40,4 +40,11 @@ public class UserController {
         userService.updateNickname(email, dto.nickname());
         return ResponseEntity.ok("닉네임이 성공적으로 수정되었습니다.");
     }
+
+    // 프로필 이미지 등록
+    @PatchMapping("/users/profileImage")
+    public ResponseEntity<String> updateProfileImage(@AuthenticationPrincipal String email, @RequestBody userProfileImageRequest dto) {
+        return ResponseEntity.ok(userService.updateProfileImage(email, dto.profileImage()));
+    }
+
 }

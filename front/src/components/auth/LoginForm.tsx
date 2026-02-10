@@ -32,7 +32,7 @@ function LoginForm() {
     mode: "onBlur", // 포커스가 나갈 때 검증 실행
   });
 
-  //, 로그인 처리 함수
+  // 로그인 처리 함수
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await api.post(`/auth/login`, data);

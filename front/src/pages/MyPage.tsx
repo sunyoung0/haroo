@@ -6,14 +6,13 @@ import { useErrorHandler } from "../hooks/useErrorHandler";
 import { uploadImage } from "../services/imageService";
 import api from "../api/axiosInstance";
 import { useSnackbar } from "../context/SnackbarContext";
-import { db } from "../firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { useEffect } from "react";
 
 const MyPage = () => {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
   const { errorHandler } = useErrorHandler();
-  const { userEmail, logout } = useAuthStore();
+  const { userEmail, profileImage, setProfileImage, logout } = useAuthStore();
 
   const storeNickname = useAuthStore((state) => state.nickname);
   const setNickname = useAuthStore((state) => state.setNickname);
@@ -23,6 +22,8 @@ const MyPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const displayImage = previewUrl || profileImage;
 
   // 숨겨진 input 태그 조작
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,19 +57,8 @@ const MyPage = () => {
         "profiles",
         userEmail,
       );
-      console.log("업로드 성공 ", downloadURL);
-      console.log("DB에 사용할 이메일:", userEmail);
-
-      const userRef = doc(db, "users", userEmail.trim());
-      console.log("주소(참조) 생성 완료");
-
-  setDoc(userRef, {
-    profileImage: downloadURL,
-  },)
-
-  console.log("4. serDoc 호출 직후");
-
-      alert("DB 등록 성공");
+      const response = await api.patch("/users/profileImage", {profileImage: downloadURL});
+      setProfileImage(response.data);
     } catch (error) {
       console.error("에러 원인", error);
       errorHandler(error, "firebase 등록 중 문제가 발생했습니다.");
@@ -91,6 +81,21 @@ const MyPage = () => {
     logout();
     navigate("/");
   };
+
+  useEffect(() => {
+    const loadMyProfile = async () => {
+      const response = await api.get("/users/me");
+      setProfileImage(response.data.profileImage);
+    }
+
+    // 만약 이미 Zustand에 사진 정보가 있다면(방금 바꿨다면) 서버에서 가져올 필요가 없으므로
+    if (userEmail && !profileImage) {
+      loadMyProfile();
+    }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userEmail, profileImage]);
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center">
@@ -135,9 +140,9 @@ const MyPage = () => {
                 onClick={handleEditClick}
               >
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-sky-50 transition-transform group-hover:scale-105 bg-slate-100 flex items-center justify-center">
-                  {previewUrl ? (
+                  {displayImage ? (
                     <img
-                      src={previewUrl}
+                      src={displayImage}
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />
