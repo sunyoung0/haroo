@@ -6,6 +6,7 @@ public record GroupMemberListResponse(
         Long userId,
         String userEmail,
         String nickname,
+        String profileImage,
         String joinedAt,
         MemberRole role
 ) {}

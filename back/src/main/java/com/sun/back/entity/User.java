@@ -50,9 +50,6 @@ public class User {
 
     // 프로필 이미지 등록용 메서드
     public void updateProfileImage(String profileImage) {
-        if (profileImage.isBlank()) {
-            throw new IllegalArgumentException("이미지가 없습니다.");
-        }
-        this.profileImage = profileImage;
+        this.profileImage = ((profileImage == null || profileImage.isBlank()) ? null : profileImage);
     }
 }

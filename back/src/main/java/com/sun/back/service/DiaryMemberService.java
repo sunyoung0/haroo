@@ -86,6 +86,7 @@ public class DiaryMemberService {
                         m.getUser().getId(),
                         m.getUser().getEmail(),
                         m.getUser().getNickname(),
+                        m.getUser().getProfileImage(),
                         m.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy. MM. dd")),
                         m.getRole()
                 )).toList();

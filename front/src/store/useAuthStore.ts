@@ -13,7 +13,7 @@ interface AuthState {
   login: (token: string, email: string, userId: number, nickname: string) => void;
   logout: () => void;
   setNickname: (nickname: string) => void;  // 닉네임만 업데이트
-  setProfileImage: (profileImage: string) => void;
+  setProfileImage: (profileImage: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>() (

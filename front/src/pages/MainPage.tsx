@@ -56,8 +56,11 @@ const MainPage = () => {
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate(`/mypage/${userId}`)} className="p-2.5 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-95">
-              <User size={20} />
+            <button
+              onClick={() => navigate(`/mypage/${userId}`)}
+              className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-95"
+            >
+              <User size={22} />
             </button>
             <NotificationButton />
             <button

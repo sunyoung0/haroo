@@ -2,6 +2,7 @@ export type MemberList = {
   userId: number;
   userEmail: string;
   nickname: string;
+  profileImage: string;
   role: "OWNER" | "MEMBER";
   joinedAt?: string;
 }

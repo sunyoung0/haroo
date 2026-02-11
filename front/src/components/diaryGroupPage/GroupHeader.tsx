@@ -1,7 +1,8 @@
-import { ChevronLeft, Settings, Trash2, LogOut, Pen } from "lucide-react"; // 아이콘 추가
+import { ChevronLeft, Settings, Trash2, LogOut, Pen, User } from "lucide-react"; // 아이콘 추가
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NotificationButton } from "../buttons/NotificationButton";
+import { useAuthStore } from "../../store/useAuthStore";
 
 interface GroupHeaderProps {
   title: string;
@@ -18,6 +19,7 @@ const GroupHeader = ({
 }: GroupHeaderProps) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { userId } = useAuthStore();
 
   return (
     <header className="flex items-center justify-between p-4 border-b bg-white sticky top-0 z-30">
@@ -30,10 +32,18 @@ const GroupHeader = ({
       </button>
 
       {/* 중앙: 제목 */}
-      <h1 className="text-lg text-center font-bold text-gray-800 flex-1 px-4">{title}</h1>
+      <h1 className="text-lg font-bold text-gray-800 flex-1 px-4">
+        {title}
+      </h1>
 
       {/* 오른쪽: 알람 + 설정 버튼 그룹 */}
       <div className="flex items-center gap-2">
+        <button
+          onClick={() => navigate(`/mypage/${userId}`)}
+          className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-95"
+        >
+          <User size={22} />
+        </button>
         {/* 알람 버튼 */}
         <NotificationButton />
 
@@ -41,13 +51,13 @@ const GroupHeader = ({
         <div className="relative">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`p-1 rounded-full transition-colors ${
+            className={`p-2 rounded-full transition-colors ${
               isMenuOpen
                 ? "bg-slate-100 text-sky-600"
                 : "text-gray-600 hover:bg-slate-100"
             }`}
           >
-            <Settings size={24} />
+            <Settings size={22} />
           </button>
 
           {isMenuOpen && (

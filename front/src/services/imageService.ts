@@ -1,5 +1,5 @@
 import { storage } from "../firebaseConfig";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 /**
  * @param file 업로드할 파일 객체
@@ -28,3 +28,19 @@ export const uploadImage = async (
     throw new Error("이미지 업로드에 실패했습니다.");
   }
 };
+
+// 이미지 URL에서 파일 경로를 추출해 삭제하는 함수
+export const deleteStorageFile = async (url: string) => {
+  try {
+    // URL에 'firebasestorage'가 포함되어있는지 확인 (기본이미지 방지)
+    if (!url || !url.includes("firebasestorage")) return;
+
+    // URL에서 파일 경로만 추출하여 참조 생성
+    const storageRef = ref(storage, url);
+    await deleteObject(storageRef);
+    console.log("기존 스토리지 파일 삭제 완료");
+
+  } catch (error) {
+    console.error("스토리지 파일 삭제 실패 또는 파일 없음");
+  }
+}

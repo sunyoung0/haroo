@@ -63,14 +63,17 @@ const MemberListView = ({
               >
                 {/* 유저 정보 */}
                 <div className="flex items-center gap-4">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-sm ${
-                      member.role === "OWNER"
-                        ? "bg-sky-600 text-white"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    <User />
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center">
+                    {member.profileImage ? (
+                      <img
+                        src={member.profileImage}
+                        alt={`${member.nickname}의 프로필`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      // 프로필 이미지가 없을 때 보여줄 기본 아이콘
+                      <User size={24} className="text-slate-300" />
+                    )}
                   </div>
                   <div className="flex flex-col gap-0.5">
                     {/* 닉네임과 뱃지를 가로로 묶어주는 컨테이너 */}
