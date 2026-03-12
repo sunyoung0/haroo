@@ -26,7 +26,8 @@ jobs:
 
       - name: Make Frontend .env
         run: |
-          echo "${{ secrets.FRONTEND_ENV }}" > ./frontend/.env
+          # 프론트엔드 빌드 및 푸시 전 .env 파일 올리기
+          echo "${{ secrets.FRONTEND_ENV }}" > ./front/.env
 
           # 2. 프론트엔드 빌드 및 푸시
           docker build -t asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/frontend-app ./front
