@@ -50,7 +50,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 허용할 프론트엔드 주소 (Vite 기본값: 5173)
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://34.50.49.124:5173", "http://haroo.p-e.kr:5173", "http://haroo.p-e.kr", "http://haroo.p-e.kr:80"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://34.50.49.124:5173", "http://haroo.p-e.kr:5173", "http://haroo.p-e.kr", "http://haroo.p-e.kr:80", "https://haroo.p-e.kr"));
 
         // 허용할 HTTP 메서드
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
