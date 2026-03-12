@@ -1,7 +1,15 @@
 import { BookHeart } from "lucide-react";
+import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-function AuthLayOut({ children, title, subtitle }) {
+interface AuthLayoutProps {
+  children: ReactNode;
+  title: string;
+  subtitle: string;
+}
+
+
+function AuthLayOut({ children, title, subtitle }: AuthLayoutProps) {
 
   const navigate = useNavigate();
 

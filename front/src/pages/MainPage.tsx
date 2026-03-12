@@ -104,6 +104,12 @@ const MainPage = () => {
 
         {/* 메인 컨텐츠 영역 */}
         <main className="flex-1 p-6 bg-slate-50/30">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-sky-100 transition-all active:scale-[0.98] mt-2 mb-6"
+          >
+            <span className="text-lg">새 그룹 생성</span>
+          </button>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* 다이어리 목록 렌더링 */}
             {diaryGroups

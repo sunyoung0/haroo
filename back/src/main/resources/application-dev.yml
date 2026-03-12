@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://host.docker.internal:3310/diary
+    username: root
+    password: 1234

@@ -1,0 +1,54 @@
+name: Deploy to GCP (Full Stack)
+
+on:
+  push:
+    branches: [ "main" ] # main 브랜치에 코드가 올라오면 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Docker Auth & Build & Push
+        run: |
+          gcloud auth configure-docker asia-northeast3-docker.pkg.dev
+          
+          # 1. 백엔드 빌드 및 푸시
+          docker build -t asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/backend-app ./back
+          docker push asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/backend-app
+
+          # 2. 프론트엔드 빌드 및 푸시
+          docker build -t asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/frontend-app ./front
+          docker push asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/frontend-app
+
+      - name: SSH Remote Commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GCP_VM_IP }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          script: |
+            # 1. 기존 컨테이너 멈추고 삭제 (백엔드, 프론트엔드 둘 다)
+            sudo docker rm -f backend frontend
+
+            # 2. 방금 깃허브가 올린 최신 이미지 가져오기
+            sudo docker pull asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/backend-app
+            sudo docker pull asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/frontend-app
+
+            # 3. 백엔드 재실행
+            sudo docker run -d -p 8080:8080 --name backend --network diary-net \
+              -e SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/diary \
+              -e SPRING_DATASOURCE_USERNAME=root \
+              -e SPRING_DATASOURCE_PASSWORD=1234 \
+              asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/backend-app
+
+            # 4. 프론트엔드 재실행 (80 포트로 연결)
+            sudo docker run -d -p 80:80 --name frontend --network diary-net \
+              asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/frontend-app

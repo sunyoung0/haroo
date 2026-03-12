@@ -50,7 +50,7 @@ export const NotificationProvider = ({
     // 2. SSE 구독
     const EventSource = EventSourcePolyfill || NativeEventSource;
 
-    const eventSource = new EventSource(`http://localhost:8080/subscribe`, {
+    const eventSource = new EventSource(`${import.meta.env.VITE_API_BASE_URL}/subscribe`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

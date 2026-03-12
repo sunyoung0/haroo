@@ -159,6 +159,12 @@ const DiaryGroupPage = () => {
 
         {/* 메인 콘텐츠 영역 */}
         <main className="flex-1 p-6 overflow-y-auto bg-slate-50/50 space-y-6">
+          <button
+            onClick={() => navigate(`/diaries/write/${groupId}`)}
+            className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-sky-100 transition-all active:scale-[0.98] mt-2"
+          >
+            <span className="text-lg">새 일기 작성</span>
+          </button>
           {activeTab === "feed" && (
             <>
               {diariesList.length > 0 ? (

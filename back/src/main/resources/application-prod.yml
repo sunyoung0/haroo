@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    # 나중에 GCP에 DB를 만들면 그 주소를 여기에 적게 됩니다.
+    url: jdbc:mariadb://GCP_DB_서버_IP:3306/diary_db
+    username: admin_user
+    password: 아주_강력한_서버용_비밀번호
