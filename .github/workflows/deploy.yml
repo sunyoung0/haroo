@@ -55,5 +55,5 @@ jobs:
               asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/backend-app
 
             # 4. 프론트엔드 재실행 (80 포트로 연결)
-            sudo docker run -d -p 80:80 --name frontend --network diary-net \
+            sudo docker run -d -p 3000:80 --name frontend --network diary-net \
               asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/frontend-app
