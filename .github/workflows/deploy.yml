@@ -51,7 +51,7 @@ jobs:
             sudo docker run -d -p 8080:8080 --name backend --network diary-net \
               -e SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/diary \
               -e SPRING_DATASOURCE_USERNAME=root \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.GCP_PROJECT_ID }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
               asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/diary-repo/backend-app
 
             # 4. 프론트엔드 재실행 (80 포트로 연결)
